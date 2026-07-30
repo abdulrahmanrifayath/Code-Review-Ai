@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
-from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
@@ -88,6 +88,7 @@ class ChangedFile(Base):
     __table_args__ = (
         Index("ix_changed_files_pr_id", "pull_request_id"),
         Index("ix_changed_files_filename", "filename"),
+        Index("ix_changed_files_language", "language"),
     )
 
     pull_request_id: Mapped[uuid.UUID] = mapped_column(
@@ -96,9 +97,12 @@ class ChangedFile(Base):
     filename: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
     status: Mapped[str] = mapped_column(String(50), default="modified", nullable=False) # added, modified, removed, renamed
     previous_filename: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    language: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, index=True)
+    
     additions: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     deletions: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     patch: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    parsed_diff: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
     raw_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     # Relationships
