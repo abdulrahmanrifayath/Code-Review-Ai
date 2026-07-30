@@ -1,6 +1,6 @@
 """
 SQLAlchemy ORM Models Package.
-Exports all 21 domain models and the Base class.
+Exports all 22 domain models and the Base class.
 """
 from app.models.base import Base
 from app.models.user import User
@@ -16,6 +16,7 @@ from app.models.ai_review import AIReview
 from app.models.artifacts import GeneratedTest, GeneratedDocumentation, ReviewReport
 from app.models.notification import Notification
 from app.models.activity import ActivityLog, ReviewHistory
+from app.models.webhook import WebhookEvent
 
 __all__ = [
     "Base",
@@ -40,4 +41,5 @@ __all__ = [
     "Notification",
     "ActivityLog",
     "ReviewHistory",
+    "WebhookEvent",
 ]
