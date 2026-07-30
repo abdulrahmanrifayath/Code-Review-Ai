@@ -1,0 +1,17 @@
+[MASTER]
+ignore=CVS,.git,__pycache__,venv,.venv
+init-hook='import sys; sys.path.append("./app")'
+
+[MESSAGES CONTROL]
+disable=
+    C0111, # missing-docstring
+    C0103, # invalid-name
+    R0903, # too-few-public-methods
+    R0801  # duplicate-code
+
+[FORMAT]
+max-line-length=100
+
+[DESIGN]
+max-args=6
+max-attributes=10
