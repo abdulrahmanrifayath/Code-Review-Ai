@@ -114,3 +114,21 @@ export const qualityApi = {
     return res.data
   },
 }
+
+export const testGeneratorApi = {
+  generateTests: async (payload: {
+    target_file: string
+    code_content: string
+    test_framework?: string
+    test_category?: string
+    pull_request_id?: string
+  }) => {
+    const res = await apiClient.post('/tests/generate', payload)
+    return res.data
+  },
+  getPrTests: async (owner: string, repo: string, number: number) => {
+    const res = await apiClient.get(`/tests/repos/${owner}/${repo}/pulls/${number}`)
+    return res.data
+  },
+  downloadTestUrl: (testId: string) => `${API_BASE_URL}/tests/download/${testId}`,
+}

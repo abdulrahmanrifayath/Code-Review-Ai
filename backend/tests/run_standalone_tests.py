@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from app.services.performance_analyzer.engine import PerformanceAnalyzerEngine
 from app.services.code_quality_engine.calculator import CodeQualityCalculator
+from app.services.test_generator.generator import AITestGeneratorEngine
 
 def run_tests():
     print("--- Running Performance Analyzer Tests ---")
@@ -94,7 +95,23 @@ def clean_function(x: int) -> int:
     assert q_metrics["doc_coverage_percentage"] == 100.0, f"Expected 100% doc coverage, got {q_metrics['doc_coverage_percentage']}"
     print(f"PASS: Clean Code Quality Metrics (Score: {q_metrics['overall_quality_score']}, Grade: {q_metrics['grade']})")
 
-    print("\nAll standalone performance & quality engine tests passed successfully!")
+    print("\n--- Running AI Test Generator Tests ---")
+    py_test = AITestGeneratorEngine.generate_test_suite("user_service.py", clean_code, "pytest", "comprehensive")
+    assert py_test["test_name"] == "test_user_service.py"
+    assert "import pytest" in py_test["generated_code"]
+    print("PASS: pytest Comprehensive Test Suite Generation")
+
+    junit_test = AITestGeneratorEngine.generate_test_suite("UserService.java", "public class UserService {}", "junit", "comprehensive")
+    assert "UserserviceTest.java" in junit_test["test_name"] or "UserServiceTest.java" in junit_test["test_name"]
+    assert "import org.junit.jupiter.api.Test;" in junit_test["generated_code"]
+    print("PASS: JUnit 5 Test Suite Generation")
+
+    jest_test = AITestGeneratorEngine.generate_test_suite("userService.ts", "function getUser() {}", "jest", "comprehensive")
+    assert jest_test["test_name"] == "userService.test.ts"
+    assert "describe(" in jest_test["generated_code"]
+    print("PASS: Jest Test Suite Generation")
+
+    print("\nAll standalone performance, quality, and test generator engine tests passed successfully!")
 
 if __name__ == "__main__":
     run_tests()

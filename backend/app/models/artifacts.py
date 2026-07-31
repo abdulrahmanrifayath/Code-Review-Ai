@@ -19,12 +19,15 @@ class GeneratedTest(Base):
         Index("ix_generated_tests_target", "target_file"),
     )
 
-    pull_request_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=False
+    pull_request_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
     )
-    test_framework: Mapped[str] = mapped_column(String(50), default="pytest", nullable=False) # pytest, jest, unittest
+    test_framework: Mapped[str] = mapped_column(String(50), default="pytest", nullable=False) # pytest, jest, junit
+    test_category: Mapped[str] = mapped_column(String(50), default="comprehensive", nullable=False) # positive, negative, boundary, mock, comprehensive
+    test_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True) # e.g. test_user_service.py
     target_file: Mapped[str] = mapped_column(String(500), nullable=False)
     generated_code: Mapped[str] = mapped_column(Text, nullable=False)
+    workflow_explanation: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     is_passing: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
 
     # Relationships

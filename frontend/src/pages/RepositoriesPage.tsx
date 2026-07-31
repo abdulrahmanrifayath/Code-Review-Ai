@@ -28,8 +28,9 @@ import { ReviewHistoryTimeline } from '../components/dashboard/ReviewHistoryTime
 import { ContributorList } from '../components/dashboard/ContributorList'
 import { PerformanceDashboardCard, PerformanceFinding } from '../components/dashboard/PerformanceDashboardCard'
 import { CodeQualityEngineCard, QualityMetrics, TrendPoint } from '../components/dashboard/CodeQualityEngineCard'
+import { TestGeneratorCard } from '../components/dashboard/TestGeneratorCard'
 import { performanceApi, qualityApi } from '../services/api'
-import { Zap, Activity } from 'lucide-react'
+import { Zap, Activity, TestTube2 } from 'lucide-react'
 
 interface RepoAnalytics {
   repository_id: string
@@ -134,7 +135,7 @@ export const RepositoriesPage: React.FC = () => {
     }
   }
 
-  const openRepoInspector = async (repo: Repository, tab: 'analytics' | 'quality' | 'performance' | 'pulls' | 'branches' = 'analytics') => {
+  const openRepoInspector = async (repo: Repository, tab: 'analytics' | 'quality' | 'performance' | 'tests' | 'pulls' | 'branches' = 'analytics') => {
     setSelectedRepo(repo)
     setActiveTab(tab)
     setInspectingPR(null)
@@ -171,6 +172,8 @@ export const RepositoriesPage: React.FC = () => {
             lowCount: 0,
           })
         }
+      } else if (tab === 'tests') {
+        // No pre-fetch required for interactive test generator
       } else if (tab === 'branches') {
         const res = await apiClient.get(`/github/repos/${owner}/${name}/branches`)
         setBranches(res.data)
@@ -185,7 +188,7 @@ export const RepositoriesPage: React.FC = () => {
     }
   }
 
-  const switchTab = async (tab: 'analytics' | 'quality' | 'performance' | 'pulls' | 'branches') => {
+  const switchTab = async (tab: 'analytics' | 'quality' | 'performance' | 'tests' | 'pulls' | 'branches') => {
     if (!selectedRepo) return
     setActiveTab(tab)
     setInspectingPR(null)
@@ -220,6 +223,8 @@ export const RepositoriesPage: React.FC = () => {
             lowCount: 0,
           })
         }
+      } else if (tab === 'tests') {
+        // AI Test Generator tab
       } else if (tab === 'branches') {
         const res = await apiClient.get(`/github/repos/${owner}/${name}/branches`)
         setBranches(res.data)
@@ -446,6 +451,17 @@ export const RepositoriesPage: React.FC = () => {
                 <span>Performance Analyzer</span>
               </button>
               <button
+                onClick={() => switchTab('tests')}
+                className={`py-3 text-sm font-semibold border-b-2 flex items-center space-x-2 whitespace-nowrap ${
+                  activeTab === 'tests'
+                    ? 'border-brand-500 text-brand-400'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <TestTube2 className="w-4 h-4 text-violet-400" />
+                <span>AI Test Generator</span>
+              </button>
+              <button
                 onClick={() => switchTab('pulls')}
                 className={`py-3 text-sm font-semibold border-b-2 flex items-center space-x-2 whitespace-nowrap ${
                   activeTab === 'pulls'
@@ -511,6 +527,11 @@ export const RepositoriesPage: React.FC = () => {
                   highImpactCount={performanceData.highCount}
                   mediumImpactCount={performanceData.mediumCount}
                   lowImpactCount={performanceData.lowCount}
+                />
+              ) : activeTab === 'tests' ? (
+                <TestGeneratorCard
+                  repositoryFullName={selectedRepo.full_name}
+                  defaultTargetFile={selectedRepo.language === 'Java' ? 'UserService.java' : selectedRepo.language === 'TypeScript' ? 'userService.ts' : 'user_service.py'}
                 />
               ) : activeTab === 'branches' ? (
                 <div className="space-y-2">
