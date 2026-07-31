@@ -132,3 +132,20 @@ export const testGeneratorApi = {
   },
   downloadTestUrl: (testId: string) => `${API_BASE_URL}/tests/download/${testId}`,
 }
+
+export const docGeneratorApi = {
+  generateDocs: async (payload: {
+    target_file: string
+    code_content: string
+    doc_type?: string
+    pull_request_id?: string
+  }) => {
+    const res = await apiClient.post('/docs/generate', payload)
+    return res.data
+  },
+  getPrDocs: async (owner: string, repo: string, number: number) => {
+    const res = await apiClient.get(`/docs/repos/${owner}/${repo}/pulls/${number}`)
+    return res.data
+  },
+  downloadDocUrl: (docId: string) => `${API_BASE_URL}/docs/download/${docId}`,
+}

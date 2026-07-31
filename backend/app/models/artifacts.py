@@ -36,7 +36,7 @@ class GeneratedTest(Base):
 
 class GeneratedDocumentation(Base):
     """
-    AI-generated code documentation (docstrings, OpenAPI updates, changelog entries).
+    AI-generated code documentation (docstrings, javadoc, readme, api_doc, missing_comments, function_description, usage_examples).
     """
     __tablename__ = "generated_docs"
     __table_args__ = (
@@ -44,15 +44,16 @@ class GeneratedDocumentation(Base):
         Index("ix_generated_docs_type", "doc_type"),
     )
 
-    pull_request_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=False
+    pull_request_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
     )
-    doc_type: Mapped[str] = mapped_column(String(50), default="docstring", nullable=False) # docstring, api_ref, changelog
+    doc_type: Mapped[str] = mapped_column(String(50), default="docstring", nullable=False) # docstring, javadoc, readme, api_doc, missing_comments, function_description, usage_examples
+    doc_title: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     target_file: Mapped[str] = mapped_column(String(500), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
 
     # Relationships
-    pull_request: Mapped["PullRequest"] = relationship("PullRequest", back_populates="generated_docs")
+    pull_request: Mapped[Optional["PullRequest"]] = relationship("PullRequest", back_populates="generated_docs")
 
 
 class ReviewReport(Base):

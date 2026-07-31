@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from app.services.performance_analyzer.engine import PerformanceAnalyzerEngine
 from app.services.code_quality_engine.calculator import CodeQualityCalculator
 from app.services.test_generator.generator import AITestGeneratorEngine
+from app.services.doc_generator.generator import AIDocGeneratorEngine
 
 def run_tests():
     print("--- Running Performance Analyzer Tests ---")
@@ -111,7 +112,36 @@ def clean_function(x: int) -> int:
     assert "describe(" in jest_test["generated_code"]
     print("PASS: Jest Test Suite Generation")
 
-    print("\nAll standalone performance, quality, and test generator engine tests passed successfully!")
+    print("\n--- Running AI Documentation Generator Tests ---")
+    py_doc = AIDocGeneratorEngine.generate_documentation("user_service.py", clean_code, "docstring")
+    assert "Docstrings for user_service.py" in py_doc["doc_title"]
+    print("PASS: Python Docstring Generation")
+
+    java_doc = AIDocGeneratorEngine.generate_documentation("UserService.java", "public void process() {}", "javadoc")
+    assert "/**" in java_doc["content"]
+    print("PASS: JavaDoc Generation")
+
+    readme_doc = AIDocGeneratorEngine.generate_documentation("main.py", clean_code, "readme")
+    assert "# Main Component Documentation" in readme_doc["content"]
+    print("PASS: README Update Generation")
+
+    api_doc = AIDocGeneratorEngine.generate_documentation("api.py", "@router.get('/api/users')", "api_doc")
+    assert "API Reference Specifications" in api_doc["content"]
+    print("PASS: API Documentation Generation")
+
+    comments_doc = AIDocGeneratorEngine.generate_documentation("logic.py", "def check(x):\n if x: pass", "missing_comments")
+    assert "Branch condition" in comments_doc["content"] or "Entrypoint" in comments_doc["content"]
+    print("PASS: Missing Inline Comments Generation")
+
+    func_spec_doc = AIDocGeneratorEngine.generate_documentation("service.py", "def process(): pass", "function_description")
+    assert "Functional Specifications" in func_spec_doc["content"]
+    print("PASS: Function Descriptions Generation")
+
+    examples_doc = AIDocGeneratorEngine.generate_documentation("client.py", "def run(): pass", "usage_examples")
+    assert "Executable Usage Examples" in examples_doc["content"]
+    print("PASS: Usage Examples Generation")
+
+    print("\nAll standalone performance, quality, test generator, and doc generator engine tests passed successfully!")
 
 if __name__ == "__main__":
     run_tests()
