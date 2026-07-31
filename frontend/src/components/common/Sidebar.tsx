@@ -1,12 +1,13 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, FolderGit2, FileCode2, Settings } from 'lucide-react'
+import { LayoutDashboard, FolderGit2, FileCode2, FileText } from 'lucide-react'
 
 export const Sidebar: React.FC = () => {
   const navItems = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/repositories', label: 'Repositories', icon: FolderGit2 },
     { to: '/reviews', label: 'Code Reviews', icon: FileCode2 },
+    { to: '/reports', label: 'Reports', icon: FileText },
   ]
 
   return (

@@ -8,6 +8,7 @@ from app.services.performance_analyzer.engine import PerformanceAnalyzerEngine
 from app.services.code_quality_engine.calculator import CodeQualityCalculator
 from app.services.test_generator.generator import AITestGeneratorEngine
 from app.services.doc_generator.generator import AIDocGeneratorEngine
+from app.services.reports.report_generator import ProfessionalReportGeneratorEngine
 
 def run_tests():
     print("--- Running Performance Analyzer Tests ---")
@@ -141,7 +142,26 @@ def clean_function(x: int) -> int:
     assert "Executable Usage Examples" in examples_doc["content"]
     print("PASS: Usage Examples Generation")
 
-    print("\nAll standalone performance, quality, test generator, and doc generator engine tests passed successfully!")
+    print("\n--- Running Professional Review Report Generator Tests ---")
+    md_report, title, meta = ProfessionalReportGeneratorEngine.generate_report("acme/service", 1, "MARKDOWN")
+    assert "# Executive Code Review Report" in md_report
+    assert "1. Executive Summary" in md_report
+    assert "2. Quality Score & Health Metrics" in md_report
+    print("PASS: Markdown Executive Review Report Generation")
+
+    html_report, _, _ = ProfessionalReportGeneratorEngine.generate_report("acme/service", 1, "HTML")
+    assert "<!DOCTYPE html>" in html_report
+    print("PASS: HTML Executive Review Report Generation")
+
+    pdf_report, _, _ = ProfessionalReportGeneratorEngine.generate_report("acme/service", 1, "PDF")
+    assert "<!DOCTYPE html>" in pdf_report or "%PDF" in pdf_report
+    print("PASS: PDF Executive Review Report Generation")
+
+    json_report, _, _ = ProfessionalReportGeneratorEngine.generate_report("acme/service", 1, "JSON")
+    assert '"repository": "acme/service"' in json_report
+    print("PASS: JSON Executive Review Report Generation")
+
+    print("\nAll standalone performance, quality, test generator, doc generator, and report generator engine tests passed successfully!")
 
 if __name__ == "__main__":
     run_tests()

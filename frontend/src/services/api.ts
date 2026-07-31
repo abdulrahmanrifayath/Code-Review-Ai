@@ -149,3 +149,21 @@ export const docGeneratorApi = {
   },
   downloadDocUrl: (docId: string) => `${API_BASE_URL}/docs/download/${docId}`,
 }
+
+export const reportsApi = {
+  generateReport: async (payload: {
+    repository_full_name: string
+    pr_number?: number
+    format?: string
+    pull_request_id?: string
+  }) => {
+    const res = await apiClient.post('/reports/generate', payload)
+    return res.data
+  },
+  getReportById: async (reportId: string) => {
+    const res = await apiClient.get(`/reports/${reportId}`)
+    return res.data
+  },
+  downloadReportUrl: (reportId: string, format: string = 'markdown') =>
+    `${API_BASE_URL}/reports/download/${reportId}?format=${format}`,
+}

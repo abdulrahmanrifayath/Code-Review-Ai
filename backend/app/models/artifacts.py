@@ -58,7 +58,7 @@ class GeneratedDocumentation(Base):
 
 class ReviewReport(Base):
     """
-    Exportable executive review report (Markdown, PDF, or JSON).
+    Exportable executive review report (PDF, MARKDOWN, HTML, JSON).
     """
     __tablename__ = "review_reports"
     __table_args__ = (
@@ -66,13 +66,14 @@ class ReviewReport(Base):
         Index("ix_review_reports_type", "report_type"),
     )
 
-    pull_request_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=False
+    pull_request_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
     )
-    report_type: Mapped[str] = mapped_column(String(50), default="MARKDOWN", nullable=False) # MARKDOWN, PDF, JSON
+    report_type: Mapped[str] = mapped_column(String(50), default="MARKDOWN", nullable=False) # MARKDOWN, PDF, HTML, JSON
+    report_title: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     file_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     report_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
 
     # Relationships
-    pull_request: Mapped["PullRequest"] = relationship("PullRequest", back_populates="review_reports")
+    pull_request: Mapped[Optional["PullRequest"]] = relationship("PullRequest", back_populates="review_reports")

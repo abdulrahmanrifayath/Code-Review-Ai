@@ -8,6 +8,7 @@ from app.api.v1.endpoints import (
     parser,
     performance,
     quality,
+    reports,
     repositories,
     reviews,
     security,
@@ -28,5 +29,6 @@ api_router.include_router(performance.router, prefix="/performance", tags=["Perf
 api_router.include_router(quality.router, prefix="/quality", tags=["Code Quality Engine"])
 api_router.include_router(test_generator.router, prefix="/tests", tags=["AI Test Generator"])
 api_router.include_router(doc_generator.router, prefix="/docs", tags=["AI Documentation Generator"])
+api_router.include_router(reports.router, prefix="/reports", tags=["Professional Review Reports"])
 api_router.include_router(repositories.router, prefix="/repositories", tags=["Repositories"])
 api_router.include_router(reviews.router, prefix="/reviews", tags=["Code Reviews"])

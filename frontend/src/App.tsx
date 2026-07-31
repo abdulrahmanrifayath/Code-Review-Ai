@@ -9,6 +9,7 @@ import { LoginPage } from './pages/LoginPage'
 import { OAuthCallbackPage } from './pages/OAuthCallbackPage'
 import { RepositoriesPage } from './pages/RepositoriesPage'
 import { ReviewsPage } from './pages/ReviewsPage'
+import { ReportsPage } from './pages/ReportsPage'
 import { LoadingSpinner } from './components/common/LoadingSpinner'
 
 const queryClient = new QueryClient({
@@ -68,6 +69,7 @@ export function App() {
               <Route index element={<DashboardPage />} />
               <Route path="repositories" element={<RepositoriesPage />} />
               <Route path="reviews" element={<ReviewsPage />} />
+              <Route path="reports" element={<ReportsPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
