@@ -117,15 +117,19 @@ class AnalysisService:
             for perf in findings["performance_findings"]:
                 pf_obj = PerformanceFinding(
                     analysis_result_id=analysis_result.id,
+                    rule_id=perf.get("rule_id"),
+                    category=perf.get("category"),
                     title=perf["title"],
                     description=perf["description"],
                     impact_level=perf["impact_level"],
                     complexity_delta=perf.get("complexity_delta"),
+                    suggestion_type=perf.get("suggestion_type"),
                     file_path=perf["file_path"],
                     start_line=perf["start_line"],
                     end_line=perf["end_line"],
                     code_snippet=perf.get("code_snippet"),
                     optimization_suggestion=perf.get("optimization_suggestion"),
+                    structured_recommendation=perf.get("structured_recommendation"),
                 )
                 self.db.add(pf_obj)
                 await self.db.flush()

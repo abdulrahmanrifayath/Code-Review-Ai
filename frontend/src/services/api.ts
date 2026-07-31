@@ -88,3 +88,29 @@ apiClient.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+export const performanceApi = {
+  scanPullRequest: async (owner: string, repo: string, number: number) => {
+    const res = await apiClient.post(`/performance/repos/${owner}/${repo}/pulls/${number}/scan`)
+    return res.data
+  },
+  getPullRequestFindings: async (owner: string, repo: string, number: number) => {
+    const res = await apiClient.get(`/performance/repos/${owner}/${repo}/pulls/${number}/findings`)
+    return res.data
+  },
+}
+
+export const qualityApi = {
+  getRepositoryQualityScore: async (owner: string, repo: string) => {
+    const res = await apiClient.get(`/quality/repos/${owner}/${repo}/score`)
+    return res.data
+  },
+  calculatePrQualityScore: async (owner: string, repo: string, number: number) => {
+    const res = await apiClient.post(`/quality/repos/${owner}/${repo}/pulls/${number}/calculate`)
+    return res.data
+  },
+  getRepositoryTrends: async (owner: string, repo: string, days: number = 30) => {
+    const res = await apiClient.get(`/quality/repos/${owner}/${repo}/trends`, { params: { days } })
+    return res.data
+  },
+}

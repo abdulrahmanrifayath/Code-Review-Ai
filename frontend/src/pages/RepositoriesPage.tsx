@@ -26,6 +26,10 @@ import { CommitActivityChart } from '../components/dashboard/CommitActivityChart
 import { LanguageBreakdown } from '../components/dashboard/LanguageBreakdown'
 import { ReviewHistoryTimeline } from '../components/dashboard/ReviewHistoryTimeline'
 import { ContributorList } from '../components/dashboard/ContributorList'
+import { PerformanceDashboardCard, PerformanceFinding } from '../components/dashboard/PerformanceDashboardCard'
+import { CodeQualityEngineCard, QualityMetrics, TrendPoint } from '../components/dashboard/CodeQualityEngineCard'
+import { performanceApi, qualityApi } from '../services/api'
+import { Zap, Activity } from 'lucide-react'
 
 interface RepoAnalytics {
   repository_id: string
@@ -65,12 +69,27 @@ export const RepositoriesPage: React.FC = () => {
 
   // Inspector state
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'pulls' | 'branches'>('analytics')
+  const [activeTab, setActiveTab] = useState<'analytics' | 'quality' | 'performance' | 'pulls' | 'branches'>('analytics')
   const [branches, setBranches] = useState<Branch[]>([])
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
   const [inspectingPR, setInspectingPR] = useState<PullRequest | null>(null)
   const [prCommits, setPrCommits] = useState<Commit[]>([])
   const [analytics, setAnalytics] = useState<RepoAnalytics | null>(null)
+
+  // Code Quality & Performance state
+  const [qualityData, setQualityData] = useState<{
+    score: number
+    grade: string
+    metrics: QualityMetrics
+    trends: TrendPoint[]
+  } | null>(null)
+  const [performanceData, setPerformanceData] = useState<{
+    findings: PerformanceFinding[]
+    highCount: number
+    mediumCount: number
+    lowCount: number
+  } | null>(null)
+
   const [modalLoading, setModalLoading] = useState(false)
 
   const fetchRepositories = async () => {
@@ -115,7 +134,7 @@ export const RepositoriesPage: React.FC = () => {
     }
   }
 
-  const openRepoInspector = async (repo: Repository, tab: 'analytics' | 'pulls' | 'branches' = 'analytics') => {
+  const openRepoInspector = async (repo: Repository, tab: 'analytics' | 'quality' | 'performance' | 'pulls' | 'branches' = 'analytics') => {
     setSelectedRepo(repo)
     setActiveTab(tab)
     setInspectingPR(null)
@@ -127,6 +146,31 @@ export const RepositoriesPage: React.FC = () => {
       if (tab === 'analytics') {
         const res = await apiClient.get(`/repositories/${repo.id}/analytics`)
         setAnalytics(res.data)
+      } else if (tab === 'quality') {
+        const res = await qualityApi.getRepositoryQualityScore(owner, name)
+        setQualityData({
+          score: res.current_quality_score,
+          grade: res.grade,
+          metrics: res.metrics,
+          trends: res.latest_trends,
+        })
+      } else if (tab === 'performance') {
+        const res = await performanceApi.getPullRequestFindings(owner, name, 1).catch(() => null)
+        if (res) {
+          setPerformanceData({
+            findings: res.findings,
+            highCount: res.high_impact_count,
+            mediumCount: res.medium_impact_count,
+            lowCount: res.low_impact_count,
+          })
+        } else {
+          setPerformanceData({
+            findings: [],
+            highCount: 0,
+            mediumCount: 0,
+            lowCount: 0,
+          })
+        }
       } else if (tab === 'branches') {
         const res = await apiClient.get(`/github/repos/${owner}/${name}/branches`)
         setBranches(res.data)
@@ -141,7 +185,7 @@ export const RepositoriesPage: React.FC = () => {
     }
   }
 
-  const switchTab = async (tab: 'analytics' | 'pulls' | 'branches') => {
+  const switchTab = async (tab: 'analytics' | 'quality' | 'performance' | 'pulls' | 'branches') => {
     if (!selectedRepo) return
     setActiveTab(tab)
     setInspectingPR(null)
@@ -151,6 +195,31 @@ export const RepositoriesPage: React.FC = () => {
       if (tab === 'analytics') {
         const res = await apiClient.get(`/repositories/${selectedRepo.id}/analytics`)
         setAnalytics(res.data)
+      } else if (tab === 'quality') {
+        const res = await qualityApi.getRepositoryQualityScore(owner, name)
+        setQualityData({
+          score: res.current_quality_score,
+          grade: res.grade,
+          metrics: res.metrics,
+          trends: res.latest_trends,
+        })
+      } else if (tab === 'performance') {
+        const res = await performanceApi.getPullRequestFindings(owner, name, 1).catch(() => null)
+        if (res) {
+          setPerformanceData({
+            findings: res.findings,
+            highCount: res.high_impact_count,
+            mediumCount: res.medium_impact_count,
+            lowCount: res.low_impact_count,
+          })
+        } else {
+          setPerformanceData({
+            findings: [],
+            highCount: 0,
+            mediumCount: 0,
+            lowCount: 0,
+          })
+        }
       } else if (tab === 'branches') {
         const res = await apiClient.get(`/github/repos/${owner}/${name}/branches`)
         setBranches(res.data)
@@ -342,10 +411,10 @@ export const RepositoriesPage: React.FC = () => {
             </div>
 
             {/* Modal Tabs */}
-            <div className="px-6 border-b border-slate-800 flex items-center space-x-4">
+            <div className="px-6 border-b border-slate-800 flex items-center space-x-4 overflow-x-auto">
               <button
                 onClick={() => switchTab('analytics')}
-                className={`py-3 text-sm font-semibold border-b-2 flex items-center space-x-2 ${
+                className={`py-3 text-sm font-semibold border-b-2 flex items-center space-x-2 whitespace-nowrap ${
                   activeTab === 'analytics'
                     ? 'border-brand-500 text-brand-400'
                     : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -355,8 +424,30 @@ export const RepositoriesPage: React.FC = () => {
                 <span>Health & Analytics</span>
               </button>
               <button
+                onClick={() => switchTab('quality')}
+                className={`py-3 text-sm font-semibold border-b-2 flex items-center space-x-2 whitespace-nowrap ${
+                  activeTab === 'quality'
+                    ? 'border-brand-500 text-brand-400'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Activity className="w-4 h-4 text-blue-400" />
+                <span>Code Quality Engine</span>
+              </button>
+              <button
+                onClick={() => switchTab('performance')}
+                className={`py-3 text-sm font-semibold border-b-2 flex items-center space-x-2 whitespace-nowrap ${
+                  activeTab === 'performance'
+                    ? 'border-brand-500 text-brand-400'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Zap className="w-4 h-4 text-amber-400" />
+                <span>Performance Analyzer</span>
+              </button>
+              <button
                 onClick={() => switchTab('pulls')}
-                className={`py-3 text-sm font-semibold border-b-2 flex items-center space-x-2 ${
+                className={`py-3 text-sm font-semibold border-b-2 flex items-center space-x-2 whitespace-nowrap ${
                   activeTab === 'pulls'
                     ? 'border-brand-500 text-brand-400'
                     : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -367,7 +458,7 @@ export const RepositoriesPage: React.FC = () => {
               </button>
               <button
                 onClick={() => switchTab('branches')}
-                className={`py-3 text-sm font-semibold border-b-2 flex items-center space-x-2 ${
+                className={`py-3 text-sm font-semibold border-b-2 flex items-center space-x-2 whitespace-nowrap ${
                   activeTab === 'branches'
                     ? 'border-brand-500 text-brand-400'
                     : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -404,6 +495,23 @@ export const RepositoriesPage: React.FC = () => {
                     <ContributorList contributors={analytics.contributors} />
                   </div>
                 </div>
+              ) : activeTab === 'quality' && qualityData ? (
+                <CodeQualityEngineCard
+                  repositoryFullName={selectedRepo.full_name}
+                  currentQualityScore={qualityData.score}
+                  grade={qualityData.grade}
+                  metrics={qualityData.metrics}
+                  trends={qualityData.trends}
+                />
+              ) : activeTab === 'performance' && performanceData ? (
+                <PerformanceDashboardCard
+                  repositoryFullName={selectedRepo.full_name}
+                  prNumber={1}
+                  findings={performanceData.findings}
+                  highImpactCount={performanceData.highCount}
+                  mediumImpactCount={performanceData.mediumCount}
+                  lowImpactCount={performanceData.lowCount}
+                />
               ) : activeTab === 'branches' ? (
                 <div className="space-y-2">
                   {branches.map((b) => (

@@ -1,11 +1,12 @@
 from typing import Any, Dict, List
+from app.services.performance_analyzer.engine import PerformanceAnalyzerEngine
 from app.services.static_analysis.linter_runners import LinterRunnerManager
 from app.services.static_analysis.tree_sitter_analyzer import TreeSitterAnalyzer
 
 
 class StaticAnalysisEngine:
     """
-    Unified Engine coordinating Tree-sitter AST analysis and linter runners
+    Unified Engine coordinating Tree-sitter AST analysis, Performance Analyzer, and linter runners
     across Python, Java, JavaScript, and TypeScript.
     """
 
@@ -25,6 +26,10 @@ class StaticAnalysisEngine:
                 "performance_findings": performance_findings,
                 "code_smells": code_smells,
             }
+
+        # Performance Analyzer Scan
+        perf_res = PerformanceAnalyzerEngine.analyze_file_performance(file_path, code_content)
+        performance_findings.extend(perf_res)
 
         # 1. AST Analysis (Complexity, Unused Code, Dead Code, Duplication)
         complexity_results = TreeSitterAnalyzer.calculate_cyclomatic_complexity(code_content, language)

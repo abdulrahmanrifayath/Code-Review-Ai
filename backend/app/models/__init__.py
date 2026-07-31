@@ -17,6 +17,7 @@ from app.models.artifacts import GeneratedTest, GeneratedDocumentation, ReviewRe
 from app.models.notification import Notification
 from app.models.activity import ActivityLog, ReviewHistory
 from app.models.webhook import WebhookEvent
+from app.models.quality_history import QualityHistory
 
 __all__ = [
     "Base",
@@ -42,4 +43,5 @@ __all__ = [
     "ActivityLog",
     "ReviewHistory",
     "WebhookEvent",
+    "QualityHistory",
 ]

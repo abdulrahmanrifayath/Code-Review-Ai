@@ -55,10 +55,13 @@ class PerformanceFinding(Base):
     analysis_result_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("analysis_results.id", ondelete="CASCADE"), nullable=False
     )
+    rule_id: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
+    category: Mapped[Optional[str]] = mapped_column(String(100), nullable=True) # Nested loops, Repeated DB queries, etc.
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     impact_level: Mapped[str] = mapped_column(String(50), default="MEDIUM", nullable=False) # HIGH, MEDIUM, LOW
     complexity_delta: Mapped[Optional[str]] = mapped_column(String(50), nullable=True) # e.g., O(N) -> O(N^2)
+    suggestion_type: Mapped[Optional[str]] = mapped_column(String(100), nullable=True) # Caching, Pagination, Indexes, Async, Lazy loading
     
     file_path: Mapped[str] = mapped_column(String(500), nullable=False)
     start_line: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -66,6 +69,7 @@ class PerformanceFinding(Base):
     
     code_snippet: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     optimization_suggestion: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    structured_recommendation: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Relationships
     analysis_result: Mapped["AnalysisResult"] = relationship("AnalysisResult", back_populates="performance_findings")
