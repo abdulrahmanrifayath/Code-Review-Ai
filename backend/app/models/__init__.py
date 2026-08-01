@@ -15,6 +15,7 @@ from app.models.findings import SecurityFinding, PerformanceFinding, CodeSmell
 from app.models.ai_review import AIReview
 from app.models.artifacts import GeneratedTest, GeneratedDocumentation, ReviewReport
 from app.models.notification import Notification
+from app.models.notification_preference import NotificationPreference
 from app.models.activity import ActivityLog, ReviewHistory
 from app.models.webhook import WebhookEvent
 from app.models.quality_history import QualityHistory
@@ -40,6 +41,7 @@ __all__ = [
     "GeneratedDocumentation",
     "ReviewReport",
     "Notification",
+    "NotificationPreference",
     "ActivityLog",
     "ReviewHistory",
     "WebhookEvent",

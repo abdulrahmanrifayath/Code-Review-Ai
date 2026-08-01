@@ -186,3 +186,51 @@ export const analyticsApi = {
     return res.data
   },
 }
+
+export const notificationsApi = {
+  getNotifications: async (unreadOnly: boolean = false) => {
+    const res = await apiClient.get('/notifications', { params: { unread_only: unreadOnly } })
+    return res.data
+  },
+  getUnreadCount: async () => {
+    const res = await apiClient.get('/notifications/unread-count')
+    return res.data
+  },
+  markAsRead: async (notificationId: string) => {
+    const res = await apiClient.put(`/notifications/${notificationId}/read`)
+    return res.data
+  },
+  markAllAsRead: async () => {
+    const res = await apiClient.put('/notifications/read-all')
+    return res.data
+  },
+  getPreferences: async () => {
+    const res = await apiClient.get('/notifications/preferences')
+    return res.data
+  },
+  updatePreferences: async (payload: {
+    email_enabled?: boolean
+    email_address?: string
+    slack_enabled?: boolean
+    slack_webhook_url?: string
+    discord_enabled?: boolean
+    discord_webhook_url?: string
+    github_comments_enabled?: boolean
+    in_app_enabled?: boolean
+  }) => {
+    const res = await apiClient.put('/notifications/preferences', payload)
+    return res.data
+  },
+  sendTestNotification: async (payload: {
+    channel?: string
+    title?: string
+    message?: string
+  }) => {
+    const res = await apiClient.post('/notifications/test', payload)
+    return res.data
+  },
+  retryNotification: async (notificationId: string) => {
+    const res = await apiClient.post(`/notifications/${notificationId}/retry`)
+    return res.data
+  },
+}

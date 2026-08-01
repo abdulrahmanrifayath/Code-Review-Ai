@@ -11,39 +11,65 @@ logger = logging.getLogger("reviewai.worker.notifications")
 class NotificationsWorker(BaseWorker):
     """
     Background worker for asynchronous Notifications dispatch.
-    Posts automated code review comments to GitHub PRs and dispatches alert webhooks.
+    Invokes NotificationService to deliver alerts across all user-configured channels
+    (GitHub comments, Email, Slack, Discord, and In-App notifications).
+    Supported by Redis exponential backoff retries on delivery errors.
     """
 
     def __init__(self, worker_id: Optional[str] = None, queue_mgr: Optional[Any] = None):
         super().__init__(queue_type=QueueType.NOTIFICATIONS, worker_id=worker_id, queue_mgr=queue_mgr)
 
     async def process(self, action: str, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        user_id_str = payload.get("user_id")
         repo_full_name = payload.get("repo_full_name")
         pr_number = payload.get("pr_number")
+        title = payload.get("title", f"Code Review Update for PR #{pr_number}" if pr_number else "Code Review AI Alert")
         summary = payload.get("summary", "Review complete.")
+        link_url = payload.get("link_url", f"https://github.com/{repo_full_name}/pull/{pr_number}" if repo_full_name and pr_number else None)
 
-        logger.info(
-            "Dispatching notification for PR #%s in '%s' (action: %s)",
-            pr_number, repo_full_name, action
-        )
+        logger.info("Processing notification dispatch for PR #%s (action: %s)", pr_number, action)
 
         async with AsyncSessionLocal() as db:
-            access_token = payload.get("access_token")
-            if access_token and repo_full_name and pr_number:
-                from app.services.github_api import GitHubAPIService
-                service = GitHubAPIService(access_token=access_token)
-                parts = repo_full_name.split("/")
-                if len(parts) == 2:
-                    owner, repo = parts
-                    comment_body = f"## 🤖 ReviewAI Analysis Result\n\n{summary}"
-                    await service._execute_request_with_retry(
-                        "POST", f"/repos/{owner}/{repo}/issues/{pr_number}/comments", json_data={"body": comment_body}
-                    )
-                    logger.info("Posted automated review comment to PR #%s", pr_number)
+            from app.services.notification_service import NotificationService
+            service = NotificationService(db)
+
+            # If user_id provided, parse UUID; otherwise fallback or query default user
+            target_user_id = None
+            if user_id_str:
+                import uuid
+                target_user_id = uuid.UUID(user_id_str) if isinstance(user_id_str, str) else user_id_str
+            else:
+                from sqlalchemy import select
+                from app.models.user import User
+                user_res = await db.execute(select(User).limit(1))
+                first_user = user_res.scalars().first()
+                if first_user:
+                    target_user_id = first_user.id
+
+            if not target_user_id:
+                logger.warning("No target user found for notification dispatch.")
+                return {"status": "skipped", "reason": "No user ID available"}
+
+            notification_obj, statuses = await service.dispatch_notification(
+                user_id=target_user_id,
+                title=title,
+                message=summary,
+                notification_type=payload.get("notification_type", "review_completed"),
+                link_url=link_url,
+                payload=payload,
+            )
+            await db.commit()
+
+            # Check if any remote channel failed with critical error
+            failed_channels = [ch for ch, st in statuses.items() if st.startswith("failed")]
+            if failed_channels:
+                logger.warning("Notification delivery failed on channels: %s", failed_channels)
+                # Raise error to trigger Redis worker exponential retry logic
+                raise RuntimeError(f"Notification channel failure: {', '.join(failed_channels)}")
 
         return {
-            "status": "delivered",
+            "status": "completed",
             "repo_full_name": repo_full_name,
             "pr_number": pr_number,
-            "action": action,
+            "channels": statuses,
         }

@@ -48,6 +48,9 @@ class User(Base):
     notifications: Mapped[List["Notification"]] = relationship(
         "Notification", back_populates="user", cascade="all, delete-orphan"
     )
+    notification_preference: Mapped[Optional["NotificationPreference"]] = relationship(
+        "NotificationPreference", back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
     activity_logs: Mapped[List["ActivityLog"]] = relationship(
         "ActivityLog", back_populates="user"
     )

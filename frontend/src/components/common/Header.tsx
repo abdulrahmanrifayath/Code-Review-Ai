@@ -1,6 +1,7 @@
 import React from 'react'
 import { Bot, LogOut, User } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { NotificationBell } from '../notifications/NotificationBell'
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuth()
@@ -15,6 +16,7 @@ export const Header: React.FC = () => {
       </div>
 
       <div className="flex items-center space-x-4">
+        <NotificationBell />
         {user && (
           <div className="flex items-center space-x-2 text-sm text-slate-300">
             <User className="w-4 h-4 text-slate-400" />
