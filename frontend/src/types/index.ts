@@ -35,7 +35,7 @@ export interface PullRequest {
   head_branch: string
   base_branch: string
   head_sha: string
-  author_login: str
+  author_login: string
   html_url?: string
   additions: number
   deletions: number

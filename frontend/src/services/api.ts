@@ -167,3 +167,22 @@ export const reportsApi = {
   downloadReportUrl: (reportId: string, format: string = 'markdown') =>
     `${API_BASE_URL}/reports/download/${reportId}?format=${format}`,
 }
+
+export const analyticsApi = {
+  getTrends: async (timeframe: string = '30d') => {
+    const res = await apiClient.get('/analytics/trends', { params: { timeframe } })
+    return res.data
+  },
+  getRankings: async () => {
+    const res = await apiClient.get('/analytics/rankings')
+    return res.data
+  },
+  getReviewHistory: async (search?: string, status?: string) => {
+    const res = await apiClient.get('/analytics/history', { params: { search, status } })
+    return res.data
+  },
+  getIssueDistribution: async () => {
+    const res = await apiClient.get('/analytics/issues-distribution')
+    return res.data
+  },
+}

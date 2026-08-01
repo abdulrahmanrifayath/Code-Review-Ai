@@ -1,5 +1,5 @@
 import React from 'react'
-import { Activity, ShieldCheck, Wrench, FileText, Layers, TrendingUp, Award } from 'lucide-react'
+import { Activity, ShieldCheck, Wrench, FileText, Layers, TrendingUp } from 'lucide-react'
 
 export interface QualityMetrics {
   maintainability_score: number
@@ -31,7 +31,7 @@ export interface CodeQualityEngineCardProps {
 
 export const CodeQualityEngineCard: React.FC<CodeQualityEngineCardProps> = ({
   repositoryFullName,
-  currentQualityScore,
+  currentQualityScore: _currentQualityScore,
   grade,
   metrics,
   trends,

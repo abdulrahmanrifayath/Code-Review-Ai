@@ -7,16 +7,11 @@ import {
   Sparkles,
   ShieldAlert,
   Zap,
-  Bug,
   TestTube2,
   Activity,
-  FileCheck,
-  ExternalLink,
-  Layers,
 } from 'lucide-react'
 import { reportsApi, apiClient } from '../services/api'
 import { Repository } from '../types'
-import { LoadingSpinner } from '../components/common/LoadingSpinner'
 
 export const ReportsPage: React.FC = () => {
   const [repositories, setRepositories] = useState<Repository[]>([])

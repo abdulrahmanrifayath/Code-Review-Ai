@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ShieldAlert, AlertOctagon, AlertTriangle, Info, CheckCircle2, Terminal, Code2 } from 'lucide-react'
+import { ShieldAlert, AlertOctagon, AlertTriangle, Info, CheckCircle2, Code2 } from 'lucide-react'
 
 export interface SecurityFinding {
   id?: string
@@ -8,15 +8,15 @@ export interface SecurityFinding {
   cwe_id: string
   severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | string
   title: string
-  description: str
-  file_path: str
+  description: string
+  file_path: string
   line_number: number
   code_snippet?: string
   remediation_suggestion?: string
 }
 
 export interface SecurityDashboardProps {
-  repositoryFullName: str
+  repositoryFullName: string
   prNumber: number
   totalVulnerabilitiesCount: number
   criticalCount: number

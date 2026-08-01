@@ -4,17 +4,12 @@ import {
   RefreshCw,
   GitBranch,
   GitPullRequest,
-  GitCommit,
-  ExternalLink,
   Search,
   Lock,
   Globe,
   X,
   ChevronRight,
   BarChart3,
-  Star,
-  GitFork,
-  AlertCircle,
 } from 'lucide-react'
 import { apiClient } from '../services/api'
 import { Repository, Branch, PullRequest, Commit } from '../types'
@@ -71,11 +66,11 @@ export const RepositoriesPage: React.FC = () => {
 
   // Inspector state
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'quality' | 'performance' | 'pulls' | 'branches'>('analytics')
+  const [activeTab, setActiveTab] = useState<'analytics' | 'quality' | 'performance' | 'pulls' | 'branches' | 'tests' | 'docs'>('analytics')
   const [branches, setBranches] = useState<Branch[]>([])
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
-  const [inspectingPR, setInspectingPR] = useState<PullRequest | null>(null)
-  const [prCommits, setPrCommits] = useState<Commit[]>([])
+  const [_inspectingPR, setInspectingPR] = useState<PullRequest | null>(null)
+  const [_prCommits, setPrCommits] = useState<Commit[]>([])
   const [analytics, setAnalytics] = useState<RepoAnalytics | null>(null)
 
   // Code Quality & Performance state

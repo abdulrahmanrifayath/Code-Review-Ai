@@ -8,9 +8,9 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   role: string | null
-  login: (email: string, password: str) => Promise<void>
+  login: (email: string, password: string) => Promise<void>
   loginWithGitHub: () => Promise<void>
-  handleGitHubCallback: (code: str) => Promise<void>
+  handleGitHubCallback: (code: string) => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fetchCurrentUser()
   }, [])
 
-  const login = async (email: string, password: str) => {
+  const login = async (email: string, password: string) => {
     setIsLoading(true)
     const formData = new FormData()
     formData.append('username', email)
@@ -63,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.location.href = url
   }
 
-  const handleGitHubCallback = async (code: str) => {
+  const handleGitHubCallback = async (code: string) => {
     setIsLoading(true)
     const res = await apiClient.post('/auth/github/callback', { code })
     const { access_token } = res.data

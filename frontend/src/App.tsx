@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, useAuthContext } from './context/AuthContext'
 import { DashboardLayout } from './layouts/DashboardLayout'
 import { DashboardPage } from './pages/DashboardPage'
+import { AnalyticsPage } from './pages/AnalyticsPage'
 import { LoginPage } from './pages/LoginPage'
 import { OAuthCallbackPage } from './pages/OAuthCallbackPage'
 import { RepositoriesPage } from './pages/RepositoriesPage'
@@ -67,6 +68,7 @@ export function App() {
               }
             >
               <Route index element={<DashboardPage />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
               <Route path="repositories" element={<RepositoriesPage />} />
               <Route path="reviews" element={<ReviewsPage />} />
               <Route path="reports" element={<ReportsPage />} />

@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from app.api.v1.endpoints import (
     analysis,
+    analytics,
     auth,
     doc_generator,
     github,
@@ -21,6 +22,7 @@ api_router = APIRouter()
 
 api_router.include_router(health.router, tags=["Health"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(analytics.router, prefix="/analytics", tags=["Analytics & Trends"])
 api_router.include_router(github.router, prefix="/github", tags=["GitHub Integration"])
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 api_router.include_router(queue.router, prefix="/queue", tags=["Queue Management"])
