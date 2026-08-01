@@ -1,0 +1,114 @@
+name: Production CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*.*.*' ]
+
+jobs:
+  build-and-test:
+    name: Build & Run Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies & Run Linter
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff pytest
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+          ruff check backend/
+
+      - name: Run Backend Engine Unit Tests
+        run: |
+          python backend/tests/run_standalone_tests.py
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package.json
+
+      - name: Build & Lint Frontend
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npx tsc --noEmit
+          npm run lint
+          npm run build
+
+  build-and-push-docker:
+    name: Build & Push Production Docker Images
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile.prod
+          push: true
+          tags: ghcr.io/${{ github.repository }}/backend:latest,ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+
+      - name: Build & Push Worker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile.worker
+          push: true
+          tags: ghcr.io/${{ github.repository }}/worker:latest,ghcr.io/${{ github.repository }}/worker:${{ github.sha }}
+
+      - name: Build & Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile.prod
+          push: true
+          tags: ghcr.io/${{ github.repository }}/frontend:latest,ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}
+
+  deploy-to-production:
+    name: Deploy to Production Server via SSH
+    needs: build-and-push-docker
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Remote SSH Deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/reviewai
+            git pull origin main
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker exec reviewai_backend_prod alembic upgrade head
+            echo "Deployment completed successfully for SHA: ${{ github.sha }}"

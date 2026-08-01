@@ -1,0 +1,49 @@
+# Multi-stage production Dockerfile for ReviewAI FastAPI Backend
+FROM python:3.11-slim AS builder
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    git \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --prefix=/install -r requirements.txt
+
+# Final Production Stage
+FROM python:3.11-slim AS runner
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/install/bin:$PATH" \
+    PYTHONPATH="/install/lib/python3.11/site-packages:$PYTHONPATH"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /install /install
+COPY . .
+
+# Security hardening: Create non-root user
+RUN useradd -m -u 1000 reviewuser && chown -R reviewuser:reviewuser /app
+USER reviewuser
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:8000/api/v1/health || exit 1
+
+CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "--bind", "0.0.0.0:8000"]

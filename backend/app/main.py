@@ -29,6 +29,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+from app.core.monitoring import PrometheusMiddleware
+
+# Middleware Setup
+app.add_middleware(PrometheusMiddleware)
+
 # CORS Configuration
 if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(

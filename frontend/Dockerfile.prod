@@ -1,0 +1,26 @@
+# Multi-stage production Dockerfile for ReviewAI Frontend React Vite SPA
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+
+# Build Vite static assets
+RUN npm run build
+
+# NGINX Production Stage
+FROM nginx:alpine
+
+# Remove default static files
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy built SPA artifacts
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Expose HTTP
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
