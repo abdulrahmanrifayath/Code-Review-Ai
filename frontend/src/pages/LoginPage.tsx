@@ -8,6 +8,7 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [githubLoading, setGithubLoading] = useState(false)
   
   const { login, loginWithGitHub } = useAuth()
   const navigate = useNavigate()
@@ -27,6 +28,22 @@ export const LoginPage: React.FC = () => {
     }
   }
 
+  const handleGitHubClick = async () => {
+    setError(null)
+    setGithubLoading(true)
+    try {
+      await loginWithGitHub()
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { error?: { message?: string } } } }
+      const msg =
+        errorObj.response?.data?.error?.message ||
+        'GitHub OAuth is not configured on this server. Please set GITHUB_CLIENT_ID in your backend .env file or sign in with Email & Password.'
+      setError(msg)
+    } finally {
+      setGithubLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#0b0f17] flex items-center justify-center p-4">
       <div className="w-full max-w-md glass-card p-8 rounded-2xl border border-slate-800 space-y-6 shadow-2xl">
@@ -39,9 +56,9 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {error && (
-          <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg flex items-center space-x-2 text-rose-400 text-sm">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{error}</span>
+          <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg flex items-start space-x-2 text-rose-400 text-sm">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <span className="leading-tight">{error}</span>
           </div>
         )}
 
@@ -88,13 +105,22 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <button
-          onClick={loginWithGitHub}
-          className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-medium rounded-lg flex items-center justify-center space-x-2 transition-colors"
+          onClick={handleGitHubClick}
+          disabled={githubLoading}
+          className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-medium rounded-lg flex items-center justify-center space-x-2 transition-colors disabled:opacity-50"
         >
-          <Github className="w-5 h-5" />
-          <span>GitHub Account</span>
+          {githubLoading ? (
+            <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+          ) : (
+            <>
+              <Github className="w-5 h-5" />
+              <span>GitHub Account</span>
+            </>
+          )}
         </button>
       </div>
     </div>
   )
 }
+
+export default LoginPage

@@ -19,9 +19,16 @@ class GitHubOAuthService:
         """
         Generate GitHub OAuth authorization redirect URL and anti-CSRF state token.
         """
+        client_id = settings.GITHUB_CLIENT_ID.strip() if settings.GITHUB_CLIENT_ID else ""
+        if not client_id or client_id.lower() in ("your_github_client_id", "your_client_id"):
+            raise ValidationError(
+                "GitHub OAuth Client ID is not configured. "
+                "Please set GITHUB_CLIENT_ID in your backend .env file or use email/password login."
+            )
+
         state = secrets.token_hex(16)
         params = {
-            "client_id": settings.GITHUB_CLIENT_ID,
+            "client_id": client_id,
             "redirect_uri": settings.GITHUB_REDIRECT_URI,
             "scope": "read:user user:email repo",
             "state": state,
