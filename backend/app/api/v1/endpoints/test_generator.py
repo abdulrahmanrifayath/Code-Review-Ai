@@ -75,9 +75,12 @@ async def download_generated_test_file(
     service = TestGeneratorService(db)
     record = await service.get_test_by_id(test_id)
 
-    filename = record.test_name or f"test_{record.id}.py"
+    from app.core.security_sanitizer import sanitize_filename, sanitize_header_value
+
+    raw_filename = record.test_name or f"test_{record.id}.py"
+    clean_filename = sanitize_filename(raw_filename, default_name="test_suite.py")
     headers = {
-        "Content-Disposition": f'attachment; filename="{filename}"',
+        "Content-Disposition": sanitize_header_value(f'attachment; filename="{clean_filename}"'),
         "Content-Type": "text/plain; charset=utf-8",
     }
     return Response(content=record.generated_code, headers=headers, media_type="text/plain")

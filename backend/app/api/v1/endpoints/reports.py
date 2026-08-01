@@ -59,9 +59,12 @@ async def download_review_report_file(
     service = ReportService(db)
     record = await service.get_report_by_id(report_id)
 
+    from app.core.security_sanitizer import sanitize_filename, sanitize_header_value
+
     fmt = (format or record.report_type or "markdown").lower().strip()
     metadata = record.report_metadata or {}
-    repo_name = metadata.get("repository", "repository").replace("/", "_")
+    raw_repo = metadata.get("repository", "repository")
+    repo_name = sanitize_filename(raw_repo.replace("/", "_"))
     pr_num = metadata.get("pr_number", 1)
 
     if fmt == "html":
@@ -82,9 +85,10 @@ async def download_review_report_file(
         media_type = "text/markdown"
         content = ProfessionalReportGeneratorEngine._render_markdown_report(record.report_title or "Report", metadata)
 
-    filename = f"REVIEW_REPORT_{repo_name}_PR{pr_num}{ext}"
+    raw_filename = f"REVIEW_REPORT_{repo_name}_PR{pr_num}{ext}"
+    clean_filename = sanitize_filename(raw_filename)
     headers = {
-        "Content-Disposition": f'attachment; filename="{filename}"',
-        "Content-Type": f"{media_type}; charset=utf-8",
+        "Content-Disposition": sanitize_header_value(f'attachment; filename="{clean_filename}"'),
+        "Content-Type": sanitize_header_value(f"{media_type}; charset=utf-8"),
     }
     return Response(content=content, headers=headers, media_type=media_type)
