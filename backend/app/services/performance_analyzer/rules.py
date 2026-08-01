@@ -1,7 +1,7 @@
 import re
-from typing import Any, Dict, List
+from typing import Any
 
-PERFORMANCE_RULES: List[Dict[str, Any]] = [
+PERFORMANCE_RULES: list[dict[str, Any]] = [
     # 1. Nested Loops
     {
         "id": "PERF-LOOP-001",
@@ -29,7 +29,7 @@ PERFORMANCE_RULES: List[Dict[str, Any]] = [
             "```"
         )
     },
-    
+
     # 2. Repeated Database Queries (N+1 Problem)
     {
         "id": "PERF-NPLUS1-001",

@@ -1,13 +1,15 @@
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
-from sqlalchemy import ForeignKey, Index, Integer, JSON, String
+from typing import TYPE_CHECKING, Any
+
+from sqlalchemy import JSON, ForeignKey, Index, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import Base
 
 if TYPE_CHECKING:
+    from app.models.findings import CodeSmell, PerformanceFinding, SecurityFinding
     from app.models.review_job import ReviewJob
-    from app.models.findings import SecurityFinding, PerformanceFinding, CodeSmell
 
 
 class AnalysisResult(Base):
@@ -25,13 +27,13 @@ class AnalysisResult(Base):
     )
     tool_name: Mapped[str] = mapped_column(String(100), nullable=False, index=True) # tree-sitter, eslint, pylint, checkstyle
     category: Mapped[str] = mapped_column(String(50), nullable=False) # ast_parse, linter, static_analysis
-    
-    raw_output: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
-    parsed_data: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
-    execution_time_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    raw_output: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    parsed_data: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    execution_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # Relationships
     review_job: Mapped["ReviewJob"] = relationship("ReviewJob", back_populates="analysis_results")
-    security_findings: Mapped[List["SecurityFinding"]] = relationship("SecurityFinding", back_populates="analysis_result", cascade="all, delete-orphan")
-    performance_findings: Mapped[List["PerformanceFinding"]] = relationship("PerformanceFinding", back_populates="analysis_result", cascade="all, delete-orphan")
-    code_smells: Mapped[List["CodeSmell"]] = relationship("CodeSmell", back_populates="analysis_result", cascade="all, delete-orphan")
+    security_findings: Mapped[list["SecurityFinding"]] = relationship("SecurityFinding", back_populates="analysis_result", cascade="all, delete-orphan")
+    performance_findings: Mapped[list["PerformanceFinding"]] = relationship("PerformanceFinding", back_populates="analysis_result", cascade="all, delete-orphan")
+    code_smells: Mapped[list["CodeSmell"]] = relationship("CodeSmell", back_populates="analysis_result", cascade="all, delete-orphan")

@@ -2,17 +2,16 @@ import asyncio
 import os
 import sys
 import unittest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 # Add backend directory to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.core.queue.redis_queue import RedisQueueManager
-from app.core.queue.schemas import JobPayload, JobStatus, QueueType
+from app.core.queue.schemas import JobStatus, QueueType
 from app.workers.ai_analysis_worker import AIAnalysisWorker
 from app.workers.notifications_worker import NotificationsWorker
 from app.workers.report_generation_worker import ReportGenerationWorker
-from app.workers.retry_scheduler import RetrySchedulerWorker
 from app.workers.static_analysis_worker import StaticAnalysisWorker
 from app.workers.webhook_worker import WebhookWorker
 
@@ -39,7 +38,7 @@ class MockAsyncRedis:
         self.lists[name].extend(values)
 
     async def lpop(self, name):
-        if name in self.lists and self.lists[name]:
+        if self.lists.get(name):
             return self.lists[name].pop(0)
         return None
 

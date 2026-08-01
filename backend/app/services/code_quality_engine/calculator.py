@@ -1,6 +1,6 @@
-import re
 import math
-from typing import Any, Dict, List
+import re
+from typing import Any
 
 
 class CodeQualityCalculator:
@@ -16,7 +16,7 @@ class CodeQualityCalculator:
         security_findings_count: int = 0,
         performance_findings_count: int = 0,
         code_smells_count: int = 0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calculates comprehensive quality metrics for given source code or multi-file payload.
         """

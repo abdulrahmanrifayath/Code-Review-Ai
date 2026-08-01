@@ -1,4 +1,5 @@
-from typing import Any, Dict, List
+from typing import Any
+
 from app.services.performance_analyzer.rules import PERFORMANCE_RULES
 
 
@@ -9,11 +10,11 @@ class PerformanceAnalyzerEngine:
     """
 
     @staticmethod
-    def analyze_file_performance(file_path: str, code_content: str) -> List[Dict[str, Any]]:
+    def analyze_file_performance(file_path: str, code_content: str) -> list[dict[str, Any]]:
         """
         Scan a source file against Performance Rules and return structured recommendations.
         """
-        findings: List[Dict[str, Any]] = []
+        findings: list[dict[str, Any]] = []
         if not code_content or len(code_content.strip()) == 0:
             return findings
 

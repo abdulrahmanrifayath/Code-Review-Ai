@@ -1,6 +1,6 @@
 import json
-from datetime import datetime, timezone
-from typing import Any, Dict, Tuple
+from datetime import UTC, datetime
+from typing import Any
 
 
 class ProfessionalReportGeneratorEngine:
@@ -23,8 +23,8 @@ class ProfessionalReportGeneratorEngine:
         repository_full_name: str,
         pr_number: int = 1,
         format_type: str = "MARKDOWN",
-        metadata: Dict[str, Any] = None
-    ) -> Tuple[str, str, Dict[str, Any]]:
+        metadata: dict[str, Any] = None
+    ) -> tuple[str, str, dict[str, Any]]:
         """
         Generates report content, report title, and structured metadata.
         Returns: (rendered_content, report_title, structured_metadata)
@@ -48,11 +48,11 @@ class ProfessionalReportGeneratorEngine:
         return content, report_title, metadata
 
     @staticmethod
-    def _build_sample_metadata(repository_full_name: str, pr_number: int) -> Dict[str, Any]:
+    def _build_sample_metadata(repository_full_name: str, pr_number: int) -> dict[str, Any]:
         return {
             "repository": repository_full_name,
             "pr_number": pr_number,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "executive_summary": {
                 "release_readiness": "PASSED WITH WARNINGS",
                 "risk_level": "MEDIUM",
@@ -155,7 +155,7 @@ class ProfessionalReportGeneratorEngine:
 
     # 1. Render Markdown Report
     @staticmethod
-    def _render_markdown_report(title: str, m: Dict[str, Any]) -> str:
+    def _render_markdown_report(title: str, m: dict[str, Any]) -> str:
         q = m["quality_score"]
         sec = m["security_summary"]
         perf = m["performance_summary"]
@@ -163,6 +163,10 @@ class ProfessionalReportGeneratorEngine:
         smells = m["code_smells"]
         tests = m["generated_tests"]
         ex = m["executive_summary"]
+        sec_lines = "\n".join([f"- **[{sf['severity']}] {sf['cwe_id']}**: {sf['title']} ({sf['file_path']})\n  - *Remediation*: {sf['remediation']}" for sf in sec["findings"]])
+        perf_lines = "\n".join([f"- **[{pf['impact']} IMPACT] {pf['category']}**: {pf['title']} ({pf['file_path']})\n  - *Complexity Delta*: `{pf['delta']}` | *Suggestion*: **{pf['suggestion']}**" for pf in perf["findings"]])
+        bugs_lines = "\n".join([f"- **[{b['severity']}]**: {b['title']} ({b['file_path']})\n  - *Impact*: {b['impact']}" for b in bugs["findings"]])
+        smells_lines = "\n".join([f"- `{s['type']}`: {s['description']} ({s['file_path']})" for s in smells["findings"]])
 
         return f"""# {title}
 
@@ -197,7 +201,7 @@ class ProfessionalReportGeneratorEngine:
 - **Total Vulnerabilities**: `{sec["total_vulnerabilities"]}` (Critical: `{sec["critical"]}`, High: `{sec["high"]}`, Medium: `{sec["medium"]}`, Low: `{sec["low"]}`)
 
 ### Security Findings Detail:
-{chr(10).join([f"- **[{sf['severity']}] {sf['cwe_id']}**: {sf['title']} ({sf['file_path']})\\n  - *Remediation*: {sf['remediation']}" for sf in sec["findings"]])}
+{sec_lines}
 
 ---
 
@@ -206,7 +210,7 @@ class ProfessionalReportGeneratorEngine:
 - **Total Bottlenecks**: `{perf["total_bottlenecks"]}`
 
 ### Performance Findings Detail:
-{chr(10).join([f"- **[{pf['impact']} IMPACT] {pf['category']}**: {pf['title']} ({pf['file_path']})\\n  - *Complexity Delta*: `{pf['delta']}` | *Suggestion*: **{pf['suggestion']}**" for pf in perf["findings"]])}
+{perf_lines}
 
 ---
 
@@ -214,7 +218,7 @@ class ProfessionalReportGeneratorEngine:
 
 - **Total Bug Risks**: `{bugs["total_potential_bugs"]}`
 
-{chr(10).join([f"- **[{b['severity']}]**: {b['title']} ({b['file_path']})\\n  - *Impact*: {b['impact']}" for b in bugs["findings"]])}
+{bugs_lines}
 
 ---
 
@@ -222,7 +226,7 @@ class ProfessionalReportGeneratorEngine:
 
 - **Total Code Smells**: `{smells["total_smells"]}`
 
-{chr(10).join([f"- `{s['type']}`: {s['description']} ({s['file_path']})" for s in smells["findings"]])}
+{smells_lines}
 
 ---
 
@@ -242,7 +246,7 @@ class ProfessionalReportGeneratorEngine:
 
     # 2. Render HTML Report
     @staticmethod
-    def _render_html_report(title: str, m: Dict[str, Any]) -> str:
+    def _render_html_report(title: str, m: dict[str, Any]) -> str:
         q = m["quality_score"]
         sec = m["security_summary"]
         perf = m["performance_summary"]
@@ -333,6 +337,6 @@ class ProfessionalReportGeneratorEngine:
 
     # 3. Render PDF Report
     @staticmethod
-    def _render_pdf_report(title: str, m: Dict[str, Any]) -> str:
+    def _render_pdf_report(title: str, m: dict[str, Any]) -> str:
         # Formats complete HTML printable PDF payload
         return ProfessionalReportGeneratorEngine._render_html_report(title, m)

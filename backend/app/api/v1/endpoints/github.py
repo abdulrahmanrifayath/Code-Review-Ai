@@ -1,6 +1,6 @@
 import uuid
-from typing import List
-from fastapi import APIRouter, Depends, status
+
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,7 +24,7 @@ from app.services.github_sync import GitHubSyncService
 router = APIRouter()
 
 
-@router.get("/repos", response_model=List[GitHubRepoResponse])
+@router.get("/repos", response_model=list[GitHubRepoResponse])
 async def list_user_repositories(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -67,7 +67,7 @@ async def sync_repository_details(
     )
 
 
-@router.get("/repos/{owner}/{repo}/branches", response_model=List[GitHubBranchResponse])
+@router.get("/repos/{owner}/{repo}/branches", response_model=list[GitHubBranchResponse])
 async def get_repository_branches(
     owner: str,
     repo: str,
@@ -78,7 +78,7 @@ async def get_repository_branches(
         raise ValidationError("GitHub account is not connected.")
     plain_token = decrypt_token(current_user.encrypted_github_token)
     api = GitHubAPIService(plain_token)
-    
+
     branches_data = await api.get_repository_branches(owner, repo)
     res = []
     for b in branches_data:
@@ -92,7 +92,7 @@ async def get_repository_branches(
     return res
 
 
-@router.get("/repos/{owner}/{repo}/pulls", response_model=List[GitHubPRResponse])
+@router.get("/repos/{owner}/{repo}/pulls", response_model=list[GitHubPRResponse])
 async def list_repository_pull_requests(
     owner: str,
     repo: str,
@@ -112,7 +112,7 @@ async def list_repository_pull_requests(
     return prs
 
 
-@router.get("/repos/{owner}/{repo}/pulls/{number}/commits", response_model=List[GitHubCommitResponse])
+@router.get("/repos/{owner}/{repo}/pulls/{number}/commits", response_model=list[GitHubCommitResponse])
 async def list_pull_request_commits(
     owner: str,
     repo: str,

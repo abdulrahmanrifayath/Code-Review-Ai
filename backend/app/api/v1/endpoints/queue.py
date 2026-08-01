@@ -1,4 +1,5 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
 
@@ -11,16 +12,16 @@ router = APIRouter()
 class EnqueueJobRequest(BaseModel):
     queue_type: QueueType
     action: str
-    payload: Dict[str, Any]
-    max_retries: Optional[int] = 3
+    payload: dict[str, Any]
+    max_retries: int | None = 3
 
 
 class QueuePurgeRequest(BaseModel):
-    queue_type: Optional[QueueType] = None
+    queue_type: QueueType | None = None
     dlq: bool = False
 
 
-@router.get("/stats", response_model=List[QueueStats], status_code=status.HTTP_200_OK)
+@router.get("/stats", response_model=list[QueueStats], status_code=status.HTTP_200_OK)
 async def get_queue_statistics():
     """
     Returns real-time depth metrics, active workers, completed/failed job counts,
@@ -31,13 +32,13 @@ async def get_queue_statistics():
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve queue stats: {str(exc)}",
+            detail=f"Failed to retrieve queue stats: {exc!s}",
         )
 
 
-@router.get("/jobs", response_model=List[JobPayload], status_code=status.HTTP_200_OK)
+@router.get("/jobs", response_model=list[JobPayload], status_code=status.HTTP_200_OK)
 async def list_jobs(
-    status_filter: Optional[JobStatus] = Query(None, alias="status"),
+    status_filter: JobStatus | None = Query(None, alias="status"),
     limit: int = Query(50, ge=1, le=200),
 ):
     """
@@ -48,7 +49,7 @@ async def list_jobs(
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to list queue jobs: {str(exc)}",
+            detail=f"Failed to list queue jobs: {exc!s}",
         )
 
 
@@ -81,7 +82,7 @@ async def enqueue_new_job(req: EnqueueJobRequest):
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to enqueue job: {str(exc)}",
+            detail=f"Failed to enqueue job: {exc!s}",
         )
 
 

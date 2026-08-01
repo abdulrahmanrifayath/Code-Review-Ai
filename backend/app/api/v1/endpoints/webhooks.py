@@ -1,5 +1,5 @@
 import json
-from typing import Optional
+
 from fastapi import APIRouter, Depends, Header, Request, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,7 +17,7 @@ async def receive_github_webhook(
     db: AsyncSession = Depends(get_db),
     x_github_event: str = Header(..., alias="X-GitHub-Event"),
     x_github_delivery: str = Header(..., alias="X-GitHub-Delivery"),
-    x_hub_signature_256: Optional[str] = Header(None, alias="X-Hub-Signature-256"),
+    x_hub_signature_256: str | None = Header(None, alias="X-Hub-Signature-256"),
 ):
     """
     GitHub Webhook receiver endpoint.
@@ -25,14 +25,14 @@ async def receive_github_webhook(
     stores event audit logs, updates PR database records, and queues AI ReviewJobs.
     """
     raw_body = await request.body()
-    
+
     try:
         payload_json = json.loads(raw_body.decode("utf-8"))
     except Exception:
         payload_json = {}
 
     webhook_service = GitHubWebhookService(db)
-    
+
     status_str, message, action = await webhook_service.process_incoming_webhook(
         delivery_id=x_github_delivery,
         event_type=x_github_event,

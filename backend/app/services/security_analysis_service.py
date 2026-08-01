@@ -1,5 +1,5 @@
 import uuid
-from typing import List
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,7 +10,10 @@ from app.models.pull_request import ChangedFile, PullRequest
 from app.models.repository import Repository
 from app.models.review_job import ReviewJob
 from app.models.user import User
-from app.schemas.security_dto import SecurityDashboardSummaryResponse, SecurityFindingDetailResponse
+from app.schemas.security_dto import (
+    SecurityDashboardSummaryResponse,
+    SecurityFindingDetailResponse,
+)
 from app.services.security_analyzer.engine import SecurityAnalyzerEngine
 
 
@@ -64,7 +67,7 @@ class SecurityAnalysisService:
         self.db.add(analysis_result)
         await self.db.flush()
 
-        finding_items: List[SecurityFindingDetailResponse] = []
+        finding_items: list[SecurityFindingDetailResponse] = []
 
         for cf in changed_files:
             code_content = cf.patch or ""
@@ -143,7 +146,7 @@ class SecurityAnalysisService:
         job_res = await self.db.execute(job_stmt)
         job = job_res.scalars().first()
 
-        finding_items: List[SecurityFindingDetailResponse] = []
+        finding_items: list[SecurityFindingDetailResponse] = []
 
         if job:
             ar_stmt = select(AnalysisResult).where(AnalysisResult.review_job_id == job.id)

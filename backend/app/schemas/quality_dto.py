@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import List, Optional
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -43,7 +43,7 @@ class RepoQualityScoreResponse(BaseModel):
     current_quality_score: int
     grade: str
     metrics: CodeQualityMetrics
-    latest_trends: List[QualityTrendPoint]
+    latest_trends: list[QualityTrendPoint]
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -51,4 +51,4 @@ class RepoQualityScoreResponse(BaseModel):
 class QualityHistoryResponse(BaseModel):
     repository_id: uuid.UUID
     total_snapshots: int
-    trends: List[QualityTrendPoint]
+    trends: list[QualityTrendPoint]

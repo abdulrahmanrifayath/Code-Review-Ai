@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
-from typing import Dict, List, Optional
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel
 
 
 class TrendDataPoint(BaseModel):
@@ -17,7 +17,7 @@ class QualityTrendsResponse(BaseModel):
     timeframe: str  # e.g., "7d", "30d", "90d", "1y"
     average_quality_score: float
     quality_improvement_percentage: float
-    data: List[TrendDataPoint]
+    data: list[TrendDataPoint]
 
 
 class RepositoryRankItem(BaseModel):
@@ -37,7 +37,7 @@ class RepositoryRankItem(BaseModel):
 
 class RepositoryRankingsResponse(BaseModel):
     total_repositories: int
-    rankings: List[RepositoryRankItem]
+    rankings: list[RepositoryRankItem]
 
 
 class ReviewHistoryItem(BaseModel):
@@ -51,12 +51,12 @@ class ReviewHistoryItem(BaseModel):
     quality_score: float
     findings_count: int
     created_at: datetime
-    html_url: Optional[str] = None
+    html_url: str | None = None
 
 
 class ReviewHistoryResponse(BaseModel):
     total_reviews: int
-    reviews: List[ReviewHistoryItem]
+    reviews: list[ReviewHistoryItem]
 
 
 class IssueSeverityBreakdown(BaseModel):
@@ -77,4 +77,4 @@ class IssueDistributionResponse(BaseModel):
     total_findings: int
     by_severity: IssueSeverityBreakdown
     by_category: IssueCategoryBreakdown
-    by_language: Dict[str, int]
+    by_language: dict[str, int]

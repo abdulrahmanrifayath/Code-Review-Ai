@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import List, Optional
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -19,7 +19,7 @@ class ContributorStats(BaseModel):
     author_name: str
     commits_count: int
     prs_count: int
-    avatar_url: Optional[str] = None
+    avatar_url: str | None = None
 
 
 class ReviewTimelineItem(BaseModel):
@@ -50,10 +50,10 @@ class RepositoryAnalyticsResponse(BaseModel):
     forks_count: int
     open_issues_count: int
     health: RepositoryHealthMetrics
-    languages: List[LanguageShare]
-    commit_activity: List[CommitActivityPoint]
-    contributors: List[ContributorStats]
-    review_history: List[ReviewTimelineItem]
+    languages: list[LanguageShare]
+    commit_activity: list[CommitActivityPoint]
+    contributors: list[ContributorStats]
+    review_history: list[ReviewTimelineItem]
 
 
 class DashboardMetricsResponse(BaseModel):

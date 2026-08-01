@@ -1,6 +1,6 @@
 import time
 import uuid
-from typing import List
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -84,9 +84,9 @@ class AnalysisService:
         self.db.add(analysis_result)
         await self.db.flush()
 
-        security_items: List[SecurityFindingItem] = []
-        performance_items: List[PerformanceFindingItem] = []
-        smell_items: List[CodeSmellItem] = []
+        security_items: list[SecurityFindingItem] = []
+        performance_items: list[PerformanceFindingItem] = []
+        smell_items: list[CodeSmellItem] = []
 
         for cf in changed_files:
             code_content = cf.patch or ""
@@ -196,9 +196,9 @@ class AnalysisService:
         job_res = await self.db.execute(job_stmt)
         job = job_res.scalars().first()
 
-        security_items: List[SecurityFindingItem] = []
-        performance_items: List[PerformanceFindingItem] = []
-        smell_items: List[CodeSmellItem] = []
+        security_items: list[SecurityFindingItem] = []
+        performance_items: list[PerformanceFindingItem] = []
+        smell_items: list[CodeSmellItem] = []
 
         if job:
             ar_stmt = select(AnalysisResult).where(AnalysisResult.review_job_id == job.id)

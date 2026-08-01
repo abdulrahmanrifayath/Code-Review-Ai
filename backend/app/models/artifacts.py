@@ -1,8 +1,10 @@
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, Optional
-from sqlalchemy import Boolean, ForeignKey, Index, JSON, String, Text
+from typing import TYPE_CHECKING, Any, Optional
+
+from sqlalchemy import JSON, Boolean, ForeignKey, Index, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import Base
 
 if TYPE_CHECKING:
@@ -19,16 +21,16 @@ class GeneratedTest(Base):
         Index("ix_generated_tests_target", "target_file"),
     )
 
-    pull_request_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    pull_request_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
     )
     test_framework: Mapped[str] = mapped_column(String(50), default="pytest", nullable=False) # pytest, jest, junit
     test_category: Mapped[str] = mapped_column(String(50), default="comprehensive", nullable=False) # positive, negative, boundary, mock, comprehensive
-    test_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True) # e.g. test_user_service.py
+    test_name: Mapped[str | None] = mapped_column(String(255), nullable=True) # e.g. test_user_service.py
     target_file: Mapped[str] = mapped_column(String(500), nullable=False)
     generated_code: Mapped[str] = mapped_column(Text, nullable=False)
-    workflow_explanation: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    is_passing: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    workflow_explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_passing: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     # Relationships
     pull_request: Mapped["PullRequest"] = relationship("PullRequest", back_populates="generated_tests")
@@ -44,11 +46,11 @@ class GeneratedDocumentation(Base):
         Index("ix_generated_docs_type", "doc_type"),
     )
 
-    pull_request_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    pull_request_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
     )
     doc_type: Mapped[str] = mapped_column(String(50), default="docstring", nullable=False) # docstring, javadoc, readme, api_doc, missing_comments, function_description, usage_examples
-    doc_title: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    doc_title: Mapped[str | None] = mapped_column(String(255), nullable=True)
     target_file: Mapped[str] = mapped_column(String(500), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
 
@@ -66,14 +68,14 @@ class ReviewReport(Base):
         Index("ix_review_reports_type", "report_type"),
     )
 
-    pull_request_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    pull_request_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
     )
     report_type: Mapped[str] = mapped_column(String(50), default="MARKDOWN", nullable=False) # MARKDOWN, PDF, HTML, JSON
-    report_title: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    file_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    report_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
+    report_title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    file_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    content: Mapped[str | None] = mapped_column(Text, nullable=True)
+    report_metadata: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
     # Relationships
     pull_request: Mapped[Optional["PullRequest"]] = relationship("PullRequest", back_populates="review_reports")

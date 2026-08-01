@@ -10,7 +10,10 @@ from app.models.findings import PerformanceFinding
 from app.models.pull_request import ChangedFile, PullRequest
 from app.models.repository import Repository
 from app.models.user import User
-from app.schemas.performance_dto import PerformanceAnalysisSummaryResponse, PerformanceFindingItem
+from app.schemas.performance_dto import (
+    PerformanceAnalysisSummaryResponse,
+    PerformanceFindingItem,
+)
 from app.services.performance_analyzer.engine import PerformanceAnalyzerEngine
 
 router = APIRouter()

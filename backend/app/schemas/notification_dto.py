@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -10,16 +10,16 @@ class NotificationItemResponse(BaseModel):
     title: str
     message: str
     notification_type: str  # e.g., "review_completed", "security_alert", "system"
-    link_url: Optional[str] = None
+    link_url: str | None = None
     is_read: bool
-    payload: Optional[Dict[str, Any]] = None
+    payload: dict[str, Any] | None = None
     created_at: str
 
 
 class NotificationListResponse(BaseModel):
     total_count: int
     unread_count: int
-    notifications: List[NotificationItemResponse]
+    notifications: list[NotificationItemResponse]
 
 
 class UnreadCountResponse(BaseModel):
@@ -29,27 +29,27 @@ class UnreadCountResponse(BaseModel):
 class NotificationPreferenceResponse(BaseModel):
     user_id: uuid.UUID
     email_enabled: bool
-    email_address: Optional[str] = None
+    email_address: str | None = None
     slack_enabled: bool
-    slack_webhook_url: Optional[str] = None
+    slack_webhook_url: str | None = None
     discord_enabled: bool
-    discord_webhook_url: Optional[str] = None
+    discord_webhook_url: str | None = None
     github_comments_enabled: bool
     in_app_enabled: bool
 
 
 class NotificationPreferenceUpdateRequest(BaseModel):
-    email_enabled: Optional[bool] = None
-    email_address: Optional[str] = None
-    slack_enabled: Optional[bool] = None
-    slack_webhook_url: Optional[str] = None
-    discord_enabled: Optional[bool] = None
-    discord_webhook_url: Optional[str] = None
-    github_comments_enabled: Optional[bool] = None
-    in_app_enabled: Optional[bool] = None
+    email_enabled: bool | None = None
+    email_address: str | None = None
+    slack_enabled: bool | None = None
+    slack_webhook_url: str | None = None
+    discord_enabled: bool | None = None
+    discord_webhook_url: str | None = None
+    github_comments_enabled: bool | None = None
+    in_app_enabled: bool | None = None
 
 
 class TestNotificationRequest(BaseModel):
     channel: str = Field("all", description="Target channel: all, slack, discord, email, github, in_app")
-    title: Optional[str] = "Test Notification from ReviewAI"
-    message: Optional[str] = "This is a test notification confirming your notification channel configuration is working correctly."
+    title: str | None = "Test Notification from ReviewAI"
+    message: str | None = "This is a test notification confirming your notification channel configuration is working correctly."

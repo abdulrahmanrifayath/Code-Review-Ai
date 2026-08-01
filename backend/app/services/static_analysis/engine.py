@@ -1,4 +1,5 @@
-from typing import Any, Dict, List
+from typing import Any
+
 from app.services.performance_analyzer.engine import PerformanceAnalyzerEngine
 from app.services.static_analysis.linter_runners import LinterRunnerManager
 from app.services.static_analysis.tree_sitter_analyzer import TreeSitterAnalyzer
@@ -11,14 +12,14 @@ class StaticAnalysisEngine:
     """
 
     @staticmethod
-    async def analyze_code(file_path: str, code_content: str, language: str) -> Dict[str, Any]:
+    async def analyze_code(file_path: str, code_content: str, language: str) -> dict[str, Any]:
         """
         Execute static analysis pipeline for a single source file.
         Returns dictionary containing security_findings, performance_findings, and code_smells.
         """
-        security_findings: List[Dict[str, Any]] = []
-        performance_findings: List[Dict[str, Any]] = []
-        code_smells: List[Dict[str, Any]] = []
+        security_findings: list[dict[str, Any]] = []
+        performance_findings: list[dict[str, Any]] = []
+        code_smells: list[dict[str, Any]] = []
 
         if not code_content:
             return {

@@ -4,7 +4,8 @@ import os
 import re
 import shutil
 import tempfile
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from app.core.logging import logger
 
 
@@ -15,9 +16,9 @@ class LinterRunnerManager:
     """
 
     @staticmethod
-    async def run_pylint(file_path: str, code_content: str) -> List[Dict[str, Any]]:
+    async def run_pylint(file_path: str, code_content: str) -> list[dict[str, Any]]:
         """Run Pylint on Python code."""
-        findings: List[Dict[str, Any]] = []
+        findings: list[dict[str, Any]] = []
         if not shutil.which("pylint"):
             return LinterRunnerManager._python_fallback_rules(file_path, code_content)
 
@@ -52,9 +53,9 @@ class LinterRunnerManager:
         return findings
 
     @staticmethod
-    async def run_bandit(file_path: str, code_content: str) -> List[Dict[str, Any]]:
+    async def run_bandit(file_path: str, code_content: str) -> list[dict[str, Any]]:
         """Run Bandit Python SAST security scanner."""
-        findings: List[Dict[str, Any]] = []
+        findings: list[dict[str, Any]] = []
         if not shutil.which("bandit"):
             return LinterRunnerManager._bandit_fallback_security_rules(file_path, code_content)
 
@@ -90,9 +91,9 @@ class LinterRunnerManager:
         return findings
 
     @staticmethod
-    async def run_eslint(file_path: str, code_content: str) -> List[Dict[str, Any]]:
+    async def run_eslint(file_path: str, code_content: str) -> list[dict[str, Any]]:
         """Run ESLint on JavaScript/TypeScript code."""
-        findings: List[Dict[str, Any]] = []
+        findings: list[dict[str, Any]] = []
         if not shutil.which("eslint"):
             return LinterRunnerManager._js_ts_fallback_rules(file_path, code_content)
 
@@ -129,7 +130,7 @@ class LinterRunnerManager:
         return findings
 
     @staticmethod
-    def _python_fallback_rules(file_path: str, code_content: str) -> List[Dict[str, Any]]:
+    def _python_fallback_rules(file_path: str, code_content: str) -> list[dict[str, Any]]:
         """Rule-based Python quality checker when CLI binary is missing."""
         results = []
         lines = code_content.splitlines()
@@ -155,7 +156,7 @@ class LinterRunnerManager:
         return results
 
     @staticmethod
-    def _bandit_fallback_security_rules(file_path: str, code_content: str) -> List[Dict[str, Any]]:
+    def _bandit_fallback_security_rules(file_path: str, code_content: str) -> list[dict[str, Any]]:
         """Rule-based Python security scanner fallback."""
         results = []
         lines = code_content.splitlines()
@@ -182,7 +183,7 @@ class LinterRunnerManager:
         return results
 
     @staticmethod
-    def _js_ts_fallback_rules(file_path: str, code_content: str) -> List[Dict[str, Any]]:
+    def _js_ts_fallback_rules(file_path: str, code_content: str) -> list[dict[str, Any]]:
         """Rule-based JS/TS quality checker fallback."""
         results = []
         lines = code_content.splitlines()

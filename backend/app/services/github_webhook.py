@@ -1,5 +1,5 @@
-import uuid
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,9 +25,9 @@ class GitHubWebhookService:
         delivery_id: str,
         event_type: str,
         raw_payload_bytes: bytes,
-        payload_json: Dict[str, Any],
-        signature_header: Optional[str],
-    ) -> Tuple[str, str, Optional[str]]:
+        payload_json: dict[str, Any],
+        signature_header: str | None,
+    ) -> tuple[str, str, str | None]:
         """
         Process incoming webhook.
         Returns: (status, message, action)
@@ -50,7 +50,7 @@ class GitHubWebhookService:
         github_repo_id = repo_data.get("id")
 
         # Find matching repository in DB if exists
-        repository: Optional[Repository] = None
+        repository: Repository | None = None
         if github_repo_id:
             repo_stmt = select(Repository).where(Repository.github_repo_id == github_repo_id)
             repo_res = await self.db.execute(repo_stmt)
@@ -88,10 +88,10 @@ class GitHubWebhookService:
             webhook_event.error_message = str(exc)
             await self.db.flush()
             logger.error("Failed to process webhook '%s': %s", delivery_id, str(exc), exc_info=True)
-            raise ValidationError(f"Error processing webhook: {str(exc)}")
+            raise ValidationError(f"Error processing webhook: {exc!s}")
 
     async def _handle_pull_request_event(
-        self, payload: Dict[str, Any], repository: Optional[Repository], webhook_event: WebhookEvent
+        self, payload: dict[str, Any], repository: Repository | None, webhook_event: WebhookEvent
     ) -> None:
         """
         Handle pull_request webhook events (opened, synchronize, closed, reopened, review_requested).
@@ -162,7 +162,7 @@ class GitHubWebhookService:
         webhook_event.status = "PROCESSED"
 
     async def _handle_push_event(
-        self, payload: Dict[str, Any], repository: Optional[Repository], webhook_event: WebhookEvent
+        self, payload: dict[str, Any], repository: Repository | None, webhook_event: WebhookEvent
     ) -> None:
         """Handle push webhook events."""
         if not repository:

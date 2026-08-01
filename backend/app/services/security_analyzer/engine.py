@@ -1,4 +1,5 @@
-from typing import Any, Dict, List
+from typing import Any
+
 from app.services.security_analyzer.rules import SECURITY_RULES
 
 
@@ -9,11 +10,11 @@ class SecurityAnalyzerEngine:
     """
 
     @staticmethod
-    def scan_file_content(file_path: str, code_content: str) -> List[Dict[str, Any]]:
+    def scan_file_content(file_path: str, code_content: str) -> list[dict[str, Any]]:
         """
         Scan single file content against SAST security rules.
         """
-        findings: List[Dict[str, Any]] = []
+        findings: list[dict[str, Any]] = []
         if not code_content:
             return findings
 

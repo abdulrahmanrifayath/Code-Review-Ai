@@ -1,5 +1,6 @@
 import logging
 import sys
+
 from app.core.config import settings
 
 
@@ -8,7 +9,7 @@ def setup_logging() -> None:
     Configure application logging format, handler, and log levels.
     """
     log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    
+
     logging.basicConfig(
         level=getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO),
         format=log_format,

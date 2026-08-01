@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import List, Optional
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -11,12 +11,12 @@ class GitHubBranchResponse(BaseModel):
 
 
 class GitHubCommitResponse(BaseModel):
-    id: Optional[uuid.UUID] = None
+    id: uuid.UUID | None = None
     commit_sha: str
-    author_name: Optional[str] = None
-    author_email: Optional[str] = None
+    author_name: str | None = None
+    author_email: str | None = None
     message: str
-    created_at: Optional[datetime] = None
+    created_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -26,7 +26,7 @@ class GitHubFileResponse(BaseModel):
     status: str
     additions: int
     deletions: int
-    patch: Optional[str] = None
+    patch: str | None = None
 
 
 class GitHubPRResponse(BaseModel):
@@ -34,13 +34,13 @@ class GitHubPRResponse(BaseModel):
     repository_id: uuid.UUID
     pr_number: int
     title: str
-    body: Optional[str] = None
+    body: str | None = None
     state: str
     head_branch: str
     base_branch: str
     head_sha: str
     author_login: str
-    html_url: Optional[str] = None
+    html_url: str | None = None
     additions: int
     deletions: int
     changed_files_count: int
@@ -56,7 +56,7 @@ class GitHubRepoResponse(BaseModel):
     owner_login: str
     default_branch: str
     is_private: bool
-    language: Optional[str] = None
+    language: str | None = None
     is_active: bool
     created_at: datetime
 

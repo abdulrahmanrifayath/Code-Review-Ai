@@ -1,7 +1,8 @@
 import json
-import re
-from typing import Any, Dict, List
+from typing import Any
+
 import openai
+
 from app.core.config import settings
 from app.core.logging import logger
 from app.services.ai_review.prompt_templates import SYSTEM_PROMPT, build_user_prompt
@@ -13,7 +14,7 @@ class AIReviewEngine:
     """
 
     @staticmethod
-    async def run_ai_review(context: Dict[str, Any]) -> Dict[str, Any]:
+    async def run_ai_review(context: dict[str, Any]) -> dict[str, Any]:
         """
         Execute AI code review analysis for given PR context.
         """
@@ -44,7 +45,7 @@ class AIReviewEngine:
             return AIReviewEngine._run_heuristic_fallback_review(context)
 
     @staticmethod
-    def _normalize_review_response(data: Dict[str, Any]) -> Dict[str, Any]:
+    def _normalize_review_response(data: dict[str, Any]) -> dict[str, Any]:
         """
         Normalize and validate LLM JSON output.
         """
@@ -57,7 +58,7 @@ class AIReviewEngine:
         }
 
     @staticmethod
-    def _run_heuristic_fallback_review(context: Dict[str, Any]) -> Dict[str, Any]:
+    def _run_heuristic_fallback_review(context: dict[str, Any]) -> dict[str, Any]:
         """
         Heuristic rule-based AI review fallback analyzer.
         Calculates findings, SOLID principle suggestions, naming feedback, and inline comments.
@@ -66,8 +67,8 @@ class AIReviewEngine:
         files = context.get("changed_files", [])
         static = context.get("static_analysis", {})
 
-        findings: List[Dict[str, Any]] = []
-        inline_comments: List[Dict[str, Any]] = []
+        findings: list[dict[str, Any]] = []
+        inline_comments: list[dict[str, Any]] = []
         score = 90
 
         # Process pre-detected static analysis findings

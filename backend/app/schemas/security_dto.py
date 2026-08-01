@@ -1,10 +1,10 @@
 import uuid
-from typing import List, Optional
+
 from pydantic import BaseModel, ConfigDict
 
 
 class SecurityFindingDetailResponse(BaseModel):
-    id: Optional[uuid.UUID] = None
+    id: uuid.UUID | None = None
     rule_id: str
     category: str
     cwe_id: str
@@ -13,8 +13,8 @@ class SecurityFindingDetailResponse(BaseModel):
     description: str
     file_path: str
     line_number: int
-    code_snippet: Optional[str] = None
-    remediation_suggestion: Optional[str] = None
+    code_snippet: str | None = None
+    remediation_suggestion: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -27,4 +27,4 @@ class SecurityDashboardSummaryResponse(BaseModel):
     high_count: int
     medium_count: int
     low_count: int
-    findings: List[SecurityFindingDetailResponse]
+    findings: list[SecurityFindingDetailResponse]

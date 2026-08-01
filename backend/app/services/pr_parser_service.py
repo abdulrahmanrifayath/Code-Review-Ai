@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Set
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -54,8 +54,8 @@ class PullRequestParserService:
         owner, repo_name = repo.owner_login, repo.name
         files_data = await api.get_pull_request_files(owner, repo_name, pr_number)
 
-        parsed_file_responses: List[ParsedFileDiffResponse] = []
-        languages_detected: Set[str] = set()
+        parsed_file_responses: list[ParsedFileDiffResponse] = []
+        languages_detected: set[str] = set()
         total_additions = 0
         total_deletions = 0
 
@@ -163,8 +163,8 @@ class PullRequestParserService:
         cf_res = await self.db.execute(cf_stmt)
         changed_files = list(cf_res.scalars().all())
 
-        parsed_file_responses: List[ParsedFileDiffResponse] = []
-        languages_detected: Set[str] = set()
+        parsed_file_responses: list[ParsedFileDiffResponse] = []
+        languages_detected: set[str] = set()
 
         for cf in changed_files:
             if cf.language:

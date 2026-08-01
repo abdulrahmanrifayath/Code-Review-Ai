@@ -1,15 +1,17 @@
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
+
 from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import Base
 
 if TYPE_CHECKING:
-    from app.models.pull_request import PullRequest
-    from app.models.analysis import AnalysisResult
     from app.models.ai_review import AIReview
+    from app.models.analysis import AnalysisResult
+    from app.models.pull_request import PullRequest
 
 
 class ReviewJob(Base):
@@ -27,16 +29,16 @@ class ReviewJob(Base):
     )
     status: Mapped[str] = mapped_column(String(50), default="QUEUED", nullable=False, index=True) # QUEUED, PROCESSING, COMPLETED, FAILED
     trigger_event: Mapped[str] = mapped_column(String(50), default="pr_opened", nullable=False)
-    worker_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    worker_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
-    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    duration_seconds: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    duration_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    traceback: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    traceback: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
     pull_request: Mapped["PullRequest"] = relationship("PullRequest", back_populates="review_jobs")
-    analysis_results: Mapped[List["AnalysisResult"]] = relationship("AnalysisResult", back_populates="review_job", cascade="all, delete-orphan")
-    ai_reviews: Mapped[List["AIReview"]] = relationship("AIReview", back_populates="review_job")
+    analysis_results: Mapped[list["AnalysisResult"]] = relationship("AnalysisResult", back_populates="review_job", cascade="all, delete-orphan")
+    ai_reviews: Mapped[list["AIReview"]] = relationship("AIReview", back_populates="review_job")

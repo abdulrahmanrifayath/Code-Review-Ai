@@ -1,3 +1,3 @@
-from app.core.queue.schemas import JobStatus, QueueType, JobPayload, QueueStats
+from app.core.queue.schemas import JobPayload, JobStatus, QueueStats, QueueType
 
-__all__ = ["JobStatus", "QueueType", "JobPayload", "QueueStats"]
+__all__ = ["JobPayload", "JobStatus", "QueueStats", "QueueType"]

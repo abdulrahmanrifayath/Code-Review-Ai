@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 def detect_language_from_filename(filename: str) -> str:
@@ -49,7 +49,7 @@ def detect_language_from_filename(filename: str) -> str:
     return extension_map.get(ext, "Plain Text")
 
 
-def parse_unified_diff(patch_str: str) -> Dict[str, Any]:
+def parse_unified_diff(patch_str: str) -> dict[str, Any]:
     """
     Parse a unified git diff patch string into structured hunks and line mappings.
     Returns dictionary with hunks, added_lines, deleted_lines, and line stats.
@@ -64,12 +64,12 @@ def parse_unified_diff(patch_str: str) -> Dict[str, Any]:
             "total_changes": 0,
         }
 
-    hunks: List[Dict[str, Any]] = []
-    added_lines: List[Dict[str, Any]] = []
-    deleted_lines: List[Dict[str, Any]] = []
+    hunks: list[dict[str, Any]] = []
+    added_lines: list[dict[str, Any]] = []
+    deleted_lines: list[dict[str, Any]] = []
 
     lines = patch_str.splitlines()
-    current_hunk: Optional[Dict[str, Any]] = None
+    current_hunk: dict[str, Any] | None = None
 
     old_line_num = 0
     new_line_num = 0
@@ -128,7 +128,7 @@ def parse_unified_diff(patch_str: str) -> Dict[str, Any]:
             continue
         else:
             # Context line (starts with ' ' or normal)
-            content = line[1:] if line.startswith(" ") else line
+            content = line.removeprefix(" ")
             item = {
                 "old_line_number": old_line_num,
                 "new_line_number": new_line_num,

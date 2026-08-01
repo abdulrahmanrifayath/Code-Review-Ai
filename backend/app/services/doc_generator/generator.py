@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Any, Dict, Tuple
+from typing import Any
 
 
 class AIDocGeneratorEngine:
@@ -20,7 +20,7 @@ class AIDocGeneratorEngine:
         target_file: str,
         code_content: str,
         doc_type: str = "docstring"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Main entrypoint generating documentation content and metadata.
         """
@@ -223,13 +223,13 @@ print("Result:", result)
         for line in lines:
             stripped = line.strip()
             if stripped.startswith("def ") or stripped.startswith("function ") or "public " in stripped:
-                annotated.append(f"// Step 1: Entrypoint definition for function")
+                annotated.append("// Step 1: Entrypoint definition for function")
             elif "if " in stripped:
-                annotated.append(f"    # Branch condition: Evaluate parameter boundaries")
+                annotated.append("    # Branch condition: Evaluate parameter boundaries")
             elif "for " in stripped or "while " in stripped:
-                annotated.append(f"    # Iteration loop: Traverse items sequentially")
+                annotated.append("    # Iteration loop: Traverse items sequentially")
             elif "return " in stripped:
-                annotated.append(f"    # Finalize: Return computed payload result")
+                annotated.append("    # Finalize: Return computed payload result")
             annotated.append(line)
 
         return "\n".join(annotated)

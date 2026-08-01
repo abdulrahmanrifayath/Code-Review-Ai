@@ -1,7 +1,6 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
-from app.core.database import AsyncSessionLocal
 from app.core.queue.schemas import QueueType
 from app.services.reports.report_generator import ProfessionalReportGeneratorEngine
 from app.workers.base_worker import BaseWorker
@@ -15,10 +14,10 @@ class ReportGenerationWorker(BaseWorker):
     Generates Markdown, HTML, PDF, or JSON executive code review reports.
     """
 
-    def __init__(self, worker_id: Optional[str] = None, queue_mgr: Optional[Any] = None):
+    def __init__(self, worker_id: str | None = None, queue_mgr: Any | None = None):
         super().__init__(queue_type=QueueType.REPORT_GENERATION, worker_id=worker_id, queue_mgr=queue_mgr)
 
-    async def process(self, action: str, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    async def process(self, action: str, payload: dict[str, Any]) -> dict[str, Any] | None:
         repo_full_name = payload.get("repo_full_name", "repository")
         pr_number = payload.get("pr_number", 1)
         output_format = payload.get("format", "MARKDOWN").upper()

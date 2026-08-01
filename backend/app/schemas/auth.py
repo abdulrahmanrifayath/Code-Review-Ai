@@ -1,23 +1,23 @@
 import uuid
 from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, EmailStr, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class TokenResponse(BaseModel):
     access_token: str
-    refresh_token: Optional[str] = None
+    refresh_token: str | None = None
     token_type: str = "bearer"
     expires_in: int
 
 
 class RefreshRequest(BaseModel):
-    refresh_token: Optional[str] = None
+    refresh_token: str | None = None
 
 
 class GitHubAuthCode(BaseModel):
     code: str
-    state: Optional[str] = None
+    state: str | None = None
 
 
 class GitHubOAuthUrlResponse(BaseModel):
@@ -29,8 +29,8 @@ class UserAuthResponse(BaseModel):
     id: uuid.UUID
     email: EmailStr
     username: str
-    full_name: Optional[str] = None
-    avatar_url: Optional[str] = None
+    full_name: str | None = None
+    avatar_url: str | None = None
     role: str
     is_active: bool
     is_superuser: bool
@@ -41,8 +41,8 @@ class UserAuthResponse(BaseModel):
 
 class SessionResponse(BaseModel):
     id: uuid.UUID
-    user_agent: Optional[str] = None
-    ip_address: Optional[str] = None
+    user_agent: str | None = None
+    ip_address: str | None = None
     expires_at: datetime
     is_revoked: bool
 

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from app.core.database import AsyncSessionLocal
 from app.core.queue.redis_queue import queue_manager
@@ -16,10 +16,10 @@ class AIAnalysisWorker(BaseWorker):
     saves generated AI reviews, and enqueues notifications.
     """
 
-    def __init__(self, worker_id: Optional[str] = None, queue_mgr: Optional[Any] = None):
+    def __init__(self, worker_id: str | None = None, queue_mgr: Any | None = None):
         super().__init__(queue_type=QueueType.AI_ANALYSIS, worker_id=worker_id, queue_mgr=queue_mgr)
 
-    async def process(self, action: str, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    async def process(self, action: str, payload: dict[str, Any]) -> dict[str, Any] | None:
         repo_full_name = payload.get("repo_full_name")
         pr_number = payload.get("pr_number")
 

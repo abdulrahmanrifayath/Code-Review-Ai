@@ -1,7 +1,7 @@
 import re
-from typing import Any, Dict, List
+from typing import Any
 
-SECURITY_RULES: List[Dict[str, Any]] = [
+SECURITY_RULES: list[dict[str, Any]] = [
     # 1. SQL Injection
     {
         "id": "SEC-SQLI-001",

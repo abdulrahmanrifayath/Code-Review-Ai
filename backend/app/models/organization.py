@@ -1,14 +1,16 @@
 import uuid
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
+
 from sqlalchemy import ForeignKey, Index, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import Base
 
 if TYPE_CHECKING:
-    from app.models.user import User
-    from app.models.repository import Repository
     from app.models.github import GitHubInstallation
+    from app.models.repository import Repository
+    from app.models.user import User
 
 
 class Organization(Base):
@@ -23,18 +25,18 @@ class Organization(Base):
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
-    avatar_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    billing_email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    billing_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     plan: Mapped[str] = mapped_column(String(50), default="free", nullable=False) # free, pro, enterprise
 
     # Relationships
-    members: Mapped[List["OrganizationMember"]] = relationship(
+    members: Mapped[list["OrganizationMember"]] = relationship(
         "OrganizationMember", back_populates="organization", cascade="all, delete-orphan"
     )
-    repositories: Mapped[List["Repository"]] = relationship(
+    repositories: Mapped[list["Repository"]] = relationship(
         "Repository", back_populates="organization", cascade="all, delete-orphan"
     )
-    github_installations: Mapped[List["GitHubInstallation"]] = relationship(
+    github_installations: Mapped[list["GitHubInstallation"]] = relationship(
         "GitHubInstallation", back_populates="organization"
     )
 

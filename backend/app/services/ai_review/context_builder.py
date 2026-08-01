@@ -1,10 +1,11 @@
 import uuid
-from typing import Any, Dict, List
+from typing import Any
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.analysis import AnalysisResult
-from app.models.findings import CodeSmell, PerformanceFinding, SecurityFinding
+from app.models.findings import CodeSmell, SecurityFinding
 from app.models.pull_request import ChangedFile, PullRequest
 from app.models.repository import Repository
 from app.models.review_job import ReviewJob
@@ -20,7 +21,7 @@ class AIReviewContextBuilder:
 
     async def build_pr_review_context(
         self, repository_id: uuid.UUID, pr_number: int
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Build complete context dictionary for LLM code review prompt.
         """
@@ -44,7 +45,7 @@ class AIReviewContextBuilder:
         cf_res = await self.db.execute(cf_stmt)
         changed_files = list(cf_res.scalars().all())
 
-        files_payload: List[Dict[str, Any]] = []
+        files_payload: list[dict[str, Any]] = []
         for cf in changed_files:
             files_payload.append({
                 "filename": cf.filename,
@@ -61,8 +62,8 @@ class AIReviewContextBuilder:
         job_res = await self.db.execute(job_stmt)
         job = job_res.scalars().first()
 
-        security_findings: List[Dict[str, Any]] = []
-        code_smells: List[Dict[str, Any]] = []
+        security_findings: list[dict[str, Any]] = []
+        code_smells: list[dict[str, Any]] = []
 
         if job:
             ar_stmt = select(AnalysisResult).where(AnalysisResult.review_job_id == job.id)

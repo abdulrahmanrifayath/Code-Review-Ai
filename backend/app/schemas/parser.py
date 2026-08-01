@@ -1,5 +1,6 @@
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -16,18 +17,18 @@ class DiffHunkItem(BaseModel):
     new_start: int
     new_count: int
     heading: str
-    lines: List[Dict[str, Any]]
+    lines: list[dict[str, Any]]
 
 
 class ParsedFileDiffResponse(BaseModel):
     id: uuid.UUID
     filename: str
     status: str
-    language: Optional[str] = None
+    language: str | None = None
     additions: int
     deletions: int
-    patch: Optional[str] = None
-    parsed_diff: Optional[Dict[str, Any]] = None
+    patch: str | None = None
+    parsed_diff: dict[str, Any] | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -39,5 +40,5 @@ class ParsedPRSummaryResponse(BaseModel):
     changed_files_count: int
     total_additions: int
     total_deletions: int
-    languages_detected: List[str]
-    files: List[ParsedFileDiffResponse]
+    languages_detected: list[str]
+    files: list[ParsedFileDiffResponse]

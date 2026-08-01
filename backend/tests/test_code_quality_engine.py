@@ -1,4 +1,3 @@
-import pytest
 from app.services.code_quality_engine.calculator import CodeQualityCalculator
 
 

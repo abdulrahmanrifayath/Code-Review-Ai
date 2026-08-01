@@ -1,6 +1,6 @@
 import hashlib
 import re
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any
 
 
 class TreeSitterAnalyzer:
@@ -10,17 +10,17 @@ class TreeSitterAnalyzer:
     """
 
     @staticmethod
-    def calculate_cyclomatic_complexity(code_content: str, language: str) -> List[Dict[str, Any]]:
+    def calculate_cyclomatic_complexity(code_content: str, language: str) -> list[dict[str, Any]]:
         """
         Calculate cyclomatic complexity per function/method in source code.
         Complexity formula: 1 + decision points (if, elif, for, while, catch, &&, ||, case).
         """
-        results: List[Dict[str, Any]] = []
+        results: list[dict[str, Any]] = []
         if not code_content:
             return results
 
         lines = code_content.splitlines()
-        
+
         # Regex patterns for function definitions
         if language in ("Python"):
             func_pattern = re.compile(r"^\s*def\s+([a-zA-Z0-9_]+)\s*\(")
@@ -33,7 +33,7 @@ class TreeSitterAnalyzer:
 
         decision_keywords = ["if ", "elif ", "else if", "for ", "while ", "except ", "catch ", "case ", "&&", "||", " ? "]
 
-        current_func: Optional[str] = None
+        current_func: str | None = None
         current_start_line = 1
         current_complexity = 1
 
@@ -69,11 +69,11 @@ class TreeSitterAnalyzer:
         return results
 
     @staticmethod
-    def detect_unused_code(code_content: str, language: str) -> List[Dict[str, Any]]:
+    def detect_unused_code(code_content: str, language: str) -> list[dict[str, Any]]:
         """
         Detect unused imports and unused symbol declarations.
         """
-        findings: List[Dict[str, Any]] = []
+        findings: list[dict[str, Any]] = []
         if not code_content:
             return findings
 
@@ -121,11 +121,11 @@ class TreeSitterAnalyzer:
         return findings
 
     @staticmethod
-    def detect_dead_code(code_content: str) -> List[Dict[str, Any]]:
+    def detect_dead_code(code_content: str) -> list[dict[str, Any]]:
         """
         Detect dead code (unreachable statements immediately following return, raise, throw, break, continue).
         """
-        findings: List[Dict[str, Any]] = []
+        findings: list[dict[str, Any]] = []
         if not code_content:
             return findings
 
@@ -147,11 +147,11 @@ class TreeSitterAnalyzer:
         return findings
 
     @staticmethod
-    def detect_duplicate_code(code_content: str, min_lines: int = 4) -> List[Dict[str, Any]]:
+    def detect_duplicate_code(code_content: str, min_lines: int = 4) -> list[dict[str, Any]]:
         """
         Detect duplicate code blocks via sliding window block hashing.
         """
-        findings: List[Dict[str, Any]] = []
+        findings: list[dict[str, Any]] = []
         if not code_content:
             return findings
 
@@ -159,7 +159,7 @@ class TreeSitterAnalyzer:
         if len(lines) < min_lines * 2:
             return findings
 
-        seen_blocks: Dict[str, int] = {}
+        seen_blocks: dict[str, int] = {}
         for i in range(len(lines) - min_lines + 1):
             block_str = "\n".join(lines[i : i + min_lines])
             block_hash = hashlib.md5(block_str.encode()).hexdigest()

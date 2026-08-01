@@ -1,8 +1,8 @@
 import asyncio
 import logging
 import traceback
-from typing import Any, Dict, Optional
 import uuid
+from typing import Any
 
 from app.core.queue.redis_queue import RedisQueueManager, queue_manager
 from app.core.queue.schemas import JobPayload, JobStatus, QueueType
@@ -19,8 +19,8 @@ class BaseWorker:
     def __init__(
         self,
         queue_type: QueueType,
-        worker_id: Optional[str] = None,
-        queue_mgr: Optional[RedisQueueManager] = None,
+        worker_id: str | None = None,
+        queue_mgr: RedisQueueManager | None = None,
         poll_interval: float = 1.0,
     ):
         self.queue_type = queue_type
@@ -85,7 +85,7 @@ class BaseWorker:
                 "Job '%s' failed in worker '%s': %s",
                 job_id, self.worker_id, err_msg
             )
-            
+
             # Schedule Exponential Backoff Retry or DLQ
             is_retrying, _ = await self.queue_mgr.schedule_retry(
                 job_id=job_id,
@@ -95,7 +95,7 @@ class BaseWorker:
             if not is_retrying:
                 logger.error("Job '%s' moved to DLQ permanently.", job_id)
 
-    async def process(self, action: str, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    async def process(self, action: str, payload: dict[str, Any]) -> dict[str, Any] | None:
         """
         Abstract method to be overridden by specialized worker implementations.
         """

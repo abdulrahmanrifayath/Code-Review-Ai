@@ -1,13 +1,12 @@
 import logging
 import uuid
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from datetime import UTC, datetime
+from typing import Any
 
 import httpx
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
 from app.core.errors import NotFoundError, ValidationError
 from app.models.notification import Notification
 from app.models.notification_preference import NotificationPreference
@@ -108,19 +107,19 @@ class NotificationService:
         title: str,
         message: str,
         notification_type: str = "review_completed",
-        link_url: Optional[str] = None,
-        payload: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Optional[Notification], Dict[str, str]]:
+        link_url: str | None = None,
+        payload: dict[str, Any] | None = None,
+    ) -> tuple[Notification | None, dict[str, str]]:
         """
         Dispatches notification across all enabled channels (In-App, GitHub, Email, Slack, Discord).
         Returns (notification_model, delivery_statuses)
         """
         pref = await self.get_or_create_user_preferences(user_id)
         payload = payload or {}
-        statuses: Dict[str, str] = {}
+        statuses: dict[str, str] = {}
 
         # 1. In-App Notification Record
-        notification_obj: Optional[Notification] = None
+        notification_obj: Notification | None = None
         if pref.in_app_enabled:
             notification_obj = Notification(
                 user_id=user_id,
@@ -142,7 +141,7 @@ class NotificationService:
                 statuses["slack"] = "delivered"
             except Exception as exc:
                 logger.error("Failed to send Slack webhook for user %s: %s", user_id, exc)
-                statuses["slack"] = f"failed: {str(exc)}"
+                statuses["slack"] = f"failed: {exc!s}"
 
         # 3. Discord Webhook Dispatch
         if pref.discord_enabled and pref.discord_webhook_url:
@@ -151,7 +150,7 @@ class NotificationService:
                 statuses["discord"] = "delivered"
             except Exception as exc:
                 logger.error("Failed to send Discord webhook for user %s: %s", user_id, exc)
-                statuses["discord"] = f"failed: {str(exc)}"
+                statuses["discord"] = f"failed: {exc!s}"
 
         # 4. GitHub PR Comment Dispatch
         repo_full_name = payload.get("repo_full_name")
@@ -172,7 +171,7 @@ class NotificationService:
                     statuses["github"] = "delivered"
             except Exception as exc:
                 logger.error("Failed to post GitHub comment for PR #%s: %s", pr_number, exc)
-                statuses["github"] = f"failed: {str(exc)}"
+                statuses["github"] = f"failed: {exc!s}"
 
         # 5. Email Alert Dispatch (Mock/SMTP log fallback)
         if pref.email_enabled and pref.email_address:
@@ -182,7 +181,7 @@ class NotificationService:
         return notification_obj, statuses
 
     async def _send_slack_webhook(
-        self, webhook_url: str, title: str, message: str, link_url: Optional[str] = None
+        self, webhook_url: str, title: str, message: str, link_url: str | None = None
     ):
         """
         Sends formatted Slack Block Kit payload.
@@ -216,7 +215,7 @@ class NotificationService:
                 raise ValidationError(f"Slack webhook returned status {resp.status_code}")
 
     async def _send_discord_webhook(
-        self, webhook_url: str, title: str, message: str, link_url: Optional[str] = None
+        self, webhook_url: str, title: str, message: str, link_url: str | None = None
     ):
         """
         Sends formatted Discord Embed payload.
@@ -225,7 +224,7 @@ class NotificationService:
             "title": f"🤖 {title}",
             "description": message,
             "color": 0x10B981,  # Emerald
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
         if link_url:
             embed["url"] = link_url

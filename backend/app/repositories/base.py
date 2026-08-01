@@ -1,7 +1,9 @@
 import uuid
-from typing import Any, Generic, List, Optional, Type, TypeVar, Union
+from typing import Generic, TypeVar
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.base import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
@@ -12,11 +14,11 @@ class BaseRepository(Generic[ModelType]):
     Generic Base Repository implementing standard CRUD data access patterns.
     Supports UUID and integer primary key lookups.
     """
-    def __init__(self, model: Type[ModelType], db: AsyncSession):
+    def __init__(self, model: type[ModelType], db: AsyncSession):
         self.model = model
         self.db = db
 
-    async def get_by_id(self, id_val: Union[uuid.UUID, str, int]) -> Optional[ModelType]:
+    async def get_by_id(self, id_val: uuid.UUID | str | int) -> ModelType | None:
         if isinstance(id_val, str):
             try:
                 id_val = uuid.UUID(id_val)
@@ -26,7 +28,7 @@ class BaseRepository(Generic[ModelType]):
         result = await self.db.execute(statement)
         return result.scalars().first()
 
-    async def get_multi(self, skip: int = 0, limit: int = 100) -> List[ModelType]:
+    async def get_multi(self, skip: int = 0, limit: int = 100) -> list[ModelType]:
         statement = select(self.model).where(self.model.deleted_at.is_(None)).offset(skip).limit(limit)
         result = await self.db.execute(statement)
         return list(result.scalars().all())
@@ -47,7 +49,7 @@ class BaseRepository(Generic[ModelType]):
         await self.db.refresh(db_obj)
         return db_obj
 
-    async def soft_delete(self, id_val: Union[uuid.UUID, str, int]) -> Optional[ModelType]:
+    async def soft_delete(self, id_val: uuid.UUID | str | int) -> ModelType | None:
         obj = await self.get_by_id(id_val)
         if obj:
             obj.soft_delete()
@@ -55,7 +57,7 @@ class BaseRepository(Generic[ModelType]):
             await self.db.flush()
         return obj
 
-    async def delete(self, id_val: Union[uuid.UUID, str, int]) -> Optional[ModelType]:
+    async def delete(self, id_val: uuid.UUID | str | int) -> ModelType | None:
         obj = await self.get_by_id(id_val)
         if obj:
             await self.db.delete(obj)

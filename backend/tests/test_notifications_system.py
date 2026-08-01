@@ -6,8 +6,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from app.models.notification import Notification
-from app.models.notification_preference import NotificationPreference
 from app.schemas.notification_dto import (
     NotificationListResponse,
     NotificationPreferenceResponse,

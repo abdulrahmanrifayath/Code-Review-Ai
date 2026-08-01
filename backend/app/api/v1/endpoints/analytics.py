@@ -1,4 +1,4 @@
-from typing import Optional
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -39,8 +39,8 @@ async def get_repository_rankings(
 
 @router.get("/history", response_model=ReviewHistoryResponse, status_code=status.HTTP_200_OK)
 async def get_review_history(
-    search: Optional[str] = Query(None, description="Search query by PR title, repo, or author"),
-    status_filter: Optional[str] = Query(None, alias="status", description="Filter status: ALL, APPROVED, CHANGES_REQUESTED"),
+    search: str | None = Query(None, description="Search query by PR title, repo, or author"),
+    status_filter: str | None = Query(None, alias="status", description="Filter status: ALL, APPROVED, CHANGES_REQUESTED"),
     limit: int = Query(50, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
 ):

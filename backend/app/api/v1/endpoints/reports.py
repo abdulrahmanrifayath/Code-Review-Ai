@@ -1,15 +1,11 @@
 import json
 import uuid
-from typing import List, Optional
+
 from fastapi import APIRouter, Depends, Query, Response
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
 from app.core.database import get_db
-from app.core.errors import NotFoundError
-from app.models.pull_request import PullRequest
-from app.models.repository import Repository
 from app.models.user import User
 from app.schemas.report_dto import (
     ReportGenerationRequest,
@@ -54,7 +50,7 @@ async def get_review_report_by_id(
 @router.get("/download/{report_id}")
 async def download_review_report_file(
     report_id: uuid.UUID,
-    format: Optional[str] = Query("markdown", description="Export format: pdf, markdown, html, json"),
+    format: str | None = Query("markdown", description="Export format: pdf, markdown, html, json"),
     db: AsyncSession = Depends(get_db),
 ):
     """

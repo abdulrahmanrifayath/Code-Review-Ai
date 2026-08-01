@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from typing import Optional
 
 from app.core.queue.redis_queue import RedisQueueManager, queue_manager
 
@@ -13,7 +12,7 @@ class RetrySchedulerWorker:
     and re-enqueues ready jobs whose exponential backoff delay timestamp has elapsed.
     """
 
-    def __init__(self, queue_mgr: Optional[RedisQueueManager] = None, interval: float = 1.0):
+    def __init__(self, queue_mgr: RedisQueueManager | None = None, interval: float = 1.0):
         self.queue_mgr = queue_mgr or queue_manager
         self.interval = interval
         self._running = False

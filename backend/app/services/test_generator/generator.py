@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 
 class AITestGeneratorEngine:
@@ -16,7 +16,7 @@ class AITestGeneratorEngine:
         code_content: str,
         test_framework: str = "pytest",
         test_category: str = "comprehensive"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Main entrypoint generating test code and workflow explanation.
         """
@@ -53,7 +53,7 @@ class AITestGeneratorEngine:
     @staticmethod
     def _generate_pytest_suite(
         raw_name: str, target_file: str, code_content: str, category: str
-    ) -> Tuple[str, str]:
+    ) -> tuple[str, str]:
         # Extract function definitions
         funcs = re.findall(r"def\s+([a-zA-Z0-9_]+)\s*\(", code_content)
         func_list = [f for f in funcs if not f.startswith("__")]
@@ -75,7 +75,7 @@ class AITestGeneratorEngine:
         explanation_points = [
             "### pytest Test Suite Workflow & Architecture",
             f"- **Target File**: `{target_file}`",
-            f"- **Framework**: `pytest`",
+            "- **Framework**: `pytest`",
             f"- **Category Focus**: `{category.upper()}`",
             "",
             "#### Setup & Execution Instructions:",
@@ -120,7 +120,7 @@ class AITestGeneratorEngine:
         if category in ("boundary", "comprehensive"):
             for fn in func_list[:2]:
                 code_lines.extend([
-                    f"@pytest.mark.parametrize('boundary_val', ['', 0, -1, 999999999, [], {{}}])",
+                    "@pytest.mark.parametrize('boundary_val', ['', 0, -1, 999999999, [], {}])",
                     f"def test_{fn}_boundary_values(boundary_val):",
                     f"    \"\"\"[Boundary] Parametrized edge case limits for {fn}.\"\"\"",
                     "    # Assert boundary inputs do not crash unexpectedly",
@@ -133,7 +133,7 @@ class AITestGeneratorEngine:
         if category in ("mock", "comprehensive"):
             for fn in func_list[:2]:
                 code_lines.extend([
-                    f"@patch('httpx.AsyncClient.get')",
+                    "@patch('httpx.AsyncClient.get')",
                     f"def test_{fn}_with_mock_dependency(mock_get):",
                     f"    \"\"\"[Mock] Isolated dependency testing with mock response for {fn}.\"\"\"",
                     "    mock_response = MagicMock()",
@@ -156,7 +156,7 @@ class AITestGeneratorEngine:
     @staticmethod
     def _generate_junit_suite(
         class_name: str, target_file: str, code_content: str, category: str
-    ) -> Tuple[str, str]:
+    ) -> tuple[str, str]:
         methods = re.findall(r"(?:public|private|protected)\s+[\w<>]+\s+([a-zA-Z0-9_]+)\s*\(", code_content)
         method_list = [m for m in methods if m not in ("getId", "setId", "toString", "equals", "hashCode")]
         if not method_list:
@@ -189,7 +189,7 @@ class AITestGeneratorEngine:
         explanation_points = [
             "### JUnit 5 Test Suite Workflow & Architecture",
             f"- **Target File**: `{target_file}`",
-            f"- **Framework**: `JUnit 5 + Mockito`",
+            "- **Framework**: `JUnit 5 + Mockito`",
             f"- **Category Focus**: `{category.upper()}`",
             "",
             "#### Setup & Execution Instructions:",
@@ -267,7 +267,7 @@ class AITestGeneratorEngine:
     @staticmethod
     def _generate_jest_suite(
         raw_name: str, target_file: str, code_content: str, category: str
-    ) -> Tuple[str, str]:
+    ) -> tuple[str, str]:
         funcs = re.findall(r"(?:function\s+([a-zA-Z0-9_]+)|const\s+([a-zA-Z0-9_]+)\s*=\s*(?:async\s*)?\()", code_content)
         func_list = [f[0] or f[1] for f in funcs if f[0] or f[1]]
         if not func_list:
@@ -287,7 +287,7 @@ class AITestGeneratorEngine:
         explanation_points = [
             "### Jest Test Suite Workflow & Architecture",
             f"- **Target File**: `{target_file}`",
-            f"- **Framework**: `Jest / Vitest`",
+            "- **Framework**: `Jest / Vitest`",
             f"- **Category Focus**: `{category.upper()}`",
             "",
             "#### Setup & Execution Instructions:",

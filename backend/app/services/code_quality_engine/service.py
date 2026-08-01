@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime, timedelta, timezone
-from typing import List, Optional
+from datetime import UTC, datetime, timedelta
+
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -127,7 +127,7 @@ class CodeQualityEngineService:
                 "performance": perf_count,
                 "code_smells": smell_count,
             },
-            created_at=pr.created_at or datetime.now(timezone.utc),
+            created_at=pr.created_at or datetime.now(UTC),
         )
 
     async def get_repository_quality_score(
@@ -173,8 +173,8 @@ class CodeQualityEngineService:
             )
 
         # Build trend points timeline
-        trends: List[QualityTrendPoint] = []
-        today = datetime.now(timezone.utc).date()
+        trends: list[QualityTrendPoint] = []
+        today = datetime.now(UTC).date()
 
         if snapshots:
             for s in reversed(snapshots):
@@ -227,7 +227,7 @@ class CodeQualityEngineService:
         if not repo:
             raise NotFoundError("Repository", repository_id)
 
-        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        cutoff = datetime.now(UTC) - timedelta(days=days)
         hist_stmt = select(QualityHistory).where(
             QualityHistory.repository_id == repository_id,
             QualityHistory.created_at >= cutoff
@@ -236,7 +236,7 @@ class CodeQualityEngineService:
         hist_res = await self.db.execute(hist_stmt)
         records = list(hist_res.scalars().all())
 
-        trends: List[QualityTrendPoint] = []
+        trends: list[QualityTrendPoint] = []
         for r in records:
             trends.append(
                 QualityTrendPoint(
@@ -252,7 +252,7 @@ class CodeQualityEngineService:
 
         if not trends:
             # Fallback if no history yet
-            today = datetime.now(timezone.utc).date()
+            today = datetime.now(UTC).date()
             for i in range(6, -1, -1):
                 day_date = today - timedelta(days=i)
                 trends.append(

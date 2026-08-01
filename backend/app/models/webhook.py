@@ -1,8 +1,10 @@
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, Optional
-from sqlalchemy import ForeignKey, Index, JSON, String, Text
+from typing import TYPE_CHECKING, Any, Optional
+
+from sqlalchemy import JSON, ForeignKey, Index, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import Base
 
 if TYPE_CHECKING:
@@ -22,15 +24,15 @@ class WebhookEvent(Base):
 
     delivery_id: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
     event_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True) # pull_request, push, ping
-    action: Mapped[Optional[str]] = mapped_column(String(100), nullable=True) # opened, synchronize, closed, reopened
-    
-    repository_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    action: Mapped[str | None] = mapped_column(String(100), nullable=True) # opened, synchronize, closed, reopened
+
+    repository_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("repositories.id", ondelete="SET NULL"), nullable=True
     )
-    
-    payload: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=False)
+
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
     status: Mapped[str] = mapped_column(String(50), default="RECEIVED", nullable=False, index=True) # RECEIVED, PROCESSED, DUPLICATE, FAILED, IGNORED
-    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
     repository: Mapped[Optional["Repository"]] = relationship("Repository")

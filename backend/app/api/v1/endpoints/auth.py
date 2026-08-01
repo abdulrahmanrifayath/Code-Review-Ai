@@ -1,6 +1,7 @@
-from typing import Optional
+
 from fastapi import APIRouter, Depends, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
+
 from app.api.deps import (
     clear_auth_cookies,
     get_auth_service,
@@ -99,7 +100,7 @@ async def github_oauth_callback(
 async def refresh_tokens(
     request: Request,
     response: Response,
-    refresh_payload: Optional[RefreshRequest] = None,
+    refresh_payload: RefreshRequest | None = None,
     auth_service: AuthService = Depends(get_auth_service),
 ):
     """
@@ -141,7 +142,7 @@ async def logout(
     refresh_token = request.cookies.get("refresh_token")
     if refresh_token:
         await auth_service.logout_session(refresh_token)
-    
+
     clear_auth_cookies(response)
     return {"message": "Successfully logged out."}
 

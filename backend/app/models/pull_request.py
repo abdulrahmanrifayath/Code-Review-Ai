@@ -1,17 +1,28 @@
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
-from sqlalchemy import DateTime, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint
+from typing import TYPE_CHECKING, Any
+
+from sqlalchemy import (
+    JSON,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import Base
 
 if TYPE_CHECKING:
+    from app.models.activity import ReviewHistory
+    from app.models.ai_review import AIReview
+    from app.models.artifacts import GeneratedDocumentation, GeneratedTest, ReviewReport
     from app.models.repository import Repository
     from app.models.review_job import ReviewJob
-    from app.models.ai_review import AIReview
-    from app.models.artifacts import GeneratedTest, GeneratedDocumentation, ReviewReport
-    from app.models.activity import ReviewHistory
 
 
 class PullRequest(Base):
@@ -30,28 +41,28 @@ class PullRequest(Base):
     )
     pr_number: Mapped[int] = mapped_column(Integer, nullable=False)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
-    body: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    body: Mapped[str | None] = mapped_column(Text, nullable=True)
     state: Mapped[str] = mapped_column(String(50), default="open", nullable=False) # open, closed, merged
     head_branch: Mapped[str] = mapped_column(String(255), nullable=False)
     base_branch: Mapped[str] = mapped_column(String(255), nullable=False)
     head_sha: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
     author_login: Mapped[str] = mapped_column(String(100), nullable=False)
-    html_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    
+    html_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
     additions: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     deletions: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     changed_files_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     # Relationships
     repository: Mapped["Repository"] = relationship("Repository", back_populates="pull_requests")
-    commits: Mapped[List["Commit"]] = relationship("Commit", back_populates="pull_request", cascade="all, delete-orphan")
-    changed_files: Mapped[List["ChangedFile"]] = relationship("ChangedFile", back_populates="pull_request", cascade="all, delete-orphan")
-    review_jobs: Mapped[List["ReviewJob"]] = relationship("ReviewJob", back_populates="pull_request", cascade="all, delete-orphan")
-    ai_reviews: Mapped[List["AIReview"]] = relationship("AIReview", back_populates="pull_request", cascade="all, delete-orphan")
-    generated_tests: Mapped[List["GeneratedTest"]] = relationship("GeneratedTest", back_populates="pull_request", cascade="all, delete-orphan")
-    generated_docs: Mapped[List["GeneratedDocumentation"]] = relationship("GeneratedDocumentation", back_populates="pull_request", cascade="all, delete-orphan")
-    review_reports: Mapped[List["ReviewReport"]] = relationship("ReviewReport", back_populates="pull_request", cascade="all, delete-orphan")
-    review_histories: Mapped[List["ReviewHistory"]] = relationship("ReviewHistory", back_populates="pull_request", cascade="all, delete-orphan")
+    commits: Mapped[list["Commit"]] = relationship("Commit", back_populates="pull_request", cascade="all, delete-orphan")
+    changed_files: Mapped[list["ChangedFile"]] = relationship("ChangedFile", back_populates="pull_request", cascade="all, delete-orphan")
+    review_jobs: Mapped[list["ReviewJob"]] = relationship("ReviewJob", back_populates="pull_request", cascade="all, delete-orphan")
+    ai_reviews: Mapped[list["AIReview"]] = relationship("AIReview", back_populates="pull_request", cascade="all, delete-orphan")
+    generated_tests: Mapped[list["GeneratedTest"]] = relationship("GeneratedTest", back_populates="pull_request", cascade="all, delete-orphan")
+    generated_docs: Mapped[list["GeneratedDocumentation"]] = relationship("GeneratedDocumentation", back_populates="pull_request", cascade="all, delete-orphan")
+    review_reports: Mapped[list["ReviewReport"]] = relationship("ReviewReport", back_populates="pull_request", cascade="all, delete-orphan")
+    review_histories: Mapped[list["ReviewHistory"]] = relationship("ReviewHistory", back_populates="pull_request", cascade="all, delete-orphan")
 
 
 class Commit(Base):
@@ -68,11 +79,11 @@ class Commit(Base):
         UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=False
     )
     commit_sha: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
-    author_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    author_email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    author_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    author_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     message: Mapped[str] = mapped_column(Text, nullable=False)
-    commit_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    
+    commit_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     additions: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     deletions: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
@@ -96,14 +107,14 @@ class ChangedFile(Base):
     )
     filename: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
     status: Mapped[str] = mapped_column(String(50), default="modified", nullable=False) # added, modified, removed, renamed
-    previous_filename: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    language: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, index=True)
-    
+    previous_filename: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    language: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+
     additions: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     deletions: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    patch: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    parsed_diff: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
-    raw_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    patch: Mapped[str | None] = mapped_column(Text, nullable=True)
+    parsed_diff: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    raw_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     # Relationships
     pull_request: Mapped["PullRequest"] = relationship("PullRequest", back_populates="changed_files")

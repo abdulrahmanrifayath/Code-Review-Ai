@@ -1,8 +1,10 @@
 import uuid
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Boolean, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import Base
 
 if TYPE_CHECKING:
@@ -23,13 +25,13 @@ class NotificationPreference(Base):
     )
 
     email_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    email_address: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    email_address: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     slack_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    slack_webhook_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    slack_webhook_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     discord_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    discord_webhook_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    discord_webhook_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     github_comments_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     in_app_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)

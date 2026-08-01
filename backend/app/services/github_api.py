@@ -1,8 +1,10 @@
 import asyncio
 import re
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
+
 import httpx
+
 from app.core.config import settings
 from app.core.errors import AppException, ValidationError
 
@@ -36,8 +38,8 @@ class GitHubAPIService:
         }
 
     async def _execute_request_with_retry(
-        self, method: str, endpoint: str, params: Optional[Dict[str, Any]] = None, json_data: Optional[Dict[str, Any]] = None
-    ) -> Tuple[httpx.Response, Dict[str, str]]:
+        self, method: str, endpoint: str, params: dict[str, Any] | None = None, json_data: dict[str, Any] | None = None
+    ) -> tuple[httpx.Response, dict[str, str]]:
         """
         Execute HTTP request with exponential backoff retries (3 attempts) and rate-limit tracking.
         """
@@ -80,20 +82,20 @@ class GitHubAPIService:
 
                 except (httpx.TimeoutException, httpx.NetworkError) as exc:
                     if attempt == max_retries:
-                        raise ValidationError(f"GitHub API connection failed after {max_retries} attempts: {str(exc)}")
+                        raise ValidationError(f"GitHub API connection failed after {max_retries} attempts: {exc!s}")
                     await asyncio.sleep(backoff)
                     backoff *= 2.0
 
         raise ValidationError("GitHub API request failed.")
 
     async def fetch_paginated(
-        self, endpoint: str, params: Optional[Dict[str, Any]] = None, max_pages: int = 5
-    ) -> List[Dict[str, Any]]:
+        self, endpoint: str, params: dict[str, Any] | None = None, max_pages: int = 5
+    ) -> list[dict[str, Any]]:
         """
         Fetch all pages using GitHub RFC 5988 Link header headers (<...>; rel="next").
         """
-        all_items: List[Dict[str, Any]] = []
-        current_endpoint: Optional[str] = endpoint
+        all_items: list[dict[str, Any]] = []
+        current_endpoint: str | None = endpoint
         current_params = params.copy() if params else {}
         current_params.setdefault("per_page", 100)
         page_count = 0
@@ -124,31 +126,31 @@ class GitHubAPIService:
 
         return all_items
 
-    async def get_user_repositories(self) -> List[Dict[str, Any]]:
+    async def get_user_repositories(self) -> list[dict[str, Any]]:
         """Fetch all repositories accessible by the authenticated user."""
         return await self.fetch_paginated("/user/repos", params={"sort": "updated", "direction": "desc"})
 
-    async def get_repository_metadata(self, owner: str, repo: str) -> Dict[str, Any]:
+    async def get_repository_metadata(self, owner: str, repo: str) -> dict[str, Any]:
         """Fetch metadata for a single repository."""
         response, _ = await self._execute_request_with_retry("GET", f"/repos/{owner}/{repo}")
         return response.json()
 
-    async def get_repository_branches(self, owner: str, repo: str) -> List[Dict[str, Any]]:
+    async def get_repository_branches(self, owner: str, repo: str) -> list[dict[str, Any]]:
         """Fetch branch list for a repository."""
         return await self.fetch_paginated(f"/repos/{owner}/{repo}/branches")
 
     async def get_repository_pull_requests(
         self, owner: str, repo: str, state: str = "all"
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Fetch pull requests for a repository."""
         return await self.fetch_paginated(
             f"/repos/{owner}/{repo}/pulls", params={"state": state, "sort": "updated", "direction": "desc"}
         )
 
-    async def get_pull_request_commits(self, owner: str, repo: str, pr_number: int) -> List[Dict[str, Any]]:
+    async def get_pull_request_commits(self, owner: str, repo: str, pr_number: int) -> list[dict[str, Any]]:
         """Fetch commits for a pull request."""
         return await self.fetch_paginated(f"/repos/{owner}/{repo}/pulls/{pr_number}/commits")
 
-    async def get_pull_request_files(self, owner: str, repo: str, pr_number: int) -> List[Dict[str, Any]]:
+    async def get_pull_request_files(self, owner: str, repo: str, pr_number: int) -> list[dict[str, Any]]:
         """Fetch modified files and diff patches for a pull request."""
         return await self.fetch_paginated(f"/repos/{owner}/{repo}/pulls/{pr_number}/files")

@@ -1,9 +1,8 @@
-import json
 import logging
 import time
 import uuid
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from datetime import UTC, datetime
+from typing import Any
 
 try:
     import redis.asyncio as redis
@@ -21,9 +20,9 @@ class RedisQueueManager:
     exponential backoff retry scheduling, dead-letter queue (DLQ) routing, and metrics monitoring.
     """
 
-    def __init__(self, redis_url: Optional[str] = None):
+    def __init__(self, redis_url: str | None = None):
         self.redis_url = redis_url or settings.REDIS_URL
-        self._redis_client: Optional[redis.Redis] = None
+        self._redis_client: redis.Redis | None = None
 
     async def get_redis(self):
         """
@@ -63,16 +62,16 @@ class RedisQueueManager:
         self,
         queue_type: QueueType,
         action: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         max_retries: int = 3,
-        job_id: Optional[str] = None,
+        job_id: str | None = None,
     ) -> JobPayload:
         """
         Enqueues a new background job into Redis.
         """
         client = await self.get_redis()
         j_id = job_id or f"job_{uuid.uuid4().hex[:12]}"
-        now_str = datetime.now(timezone.utc).isoformat()
+        now_str = datetime.now(UTC).isoformat()
 
         job_data = JobPayload(
             job_id=j_id,
@@ -97,7 +96,7 @@ class RedisQueueManager:
 
         # Push to FIFO Redis List
         await client.rpush(queue_key, j_id)
-        
+
         # Track in active set for statistics
         await client.sadd(f"jobs:status:{JobStatus.QUEUED.value}", j_id)
 
@@ -106,7 +105,7 @@ class RedisQueueManager:
 
     async def pop_job(
         self, queue_type: QueueType, timeout: int = 2
-    ) -> Optional[JobPayload]:
+    ) -> JobPayload | None:
         """
         Pops a job from the specified Redis list (BLPOP/LPOP).
         """
@@ -126,7 +125,7 @@ class RedisQueueManager:
 
         return await self.get_job(job_id)
 
-    async def get_job(self, job_id: str) -> Optional[JobPayload]:
+    async def get_job(self, job_id: str) -> JobPayload | None:
         """
         Fetches job payload by job ID.
         """
@@ -145,11 +144,11 @@ class RedisQueueManager:
         self,
         job_id: str,
         status: JobStatus,
-        worker_id: Optional[str] = None,
-        error_message: Optional[str] = None,
-        traceback_str: Optional[str] = None,
-        result: Optional[Dict[str, Any]] = None,
-    ) -> Optional[JobPayload]:
+        worker_id: str | None = None,
+        error_message: str | None = None,
+        traceback_str: str | None = None,
+        result: dict[str, Any] | None = None,
+    ) -> JobPayload | None:
         """
         Updates the status, execution metadata, and result of a job.
         """
@@ -160,7 +159,7 @@ class RedisQueueManager:
 
         old_status = job.status
         job.status = status
-        now_str = datetime.now(timezone.utc).isoformat()
+        now_str = datetime.now(UTC).isoformat()
 
         if status == JobStatus.PROCESSING:
             job.started_at = now_str
@@ -193,9 +192,9 @@ class RedisQueueManager:
         self,
         job_id: str,
         error_message: str,
-        traceback_str: Optional[str] = None,
+        traceback_str: str | None = None,
         base_delay_seconds: float = 2.0,
-    ) -> Tuple[bool, Optional[JobPayload]]:
+    ) -> tuple[bool, JobPayload | None]:
         """
         Schedules a failed job for exponential backoff retry, or routes to DLQ if max retries reached.
         Returns (is_retrying, updated_job)
@@ -210,7 +209,7 @@ class RedisQueueManager:
             job.status = JobStatus.RETRYING
             job.error_message = error_message
             job.traceback = traceback_str
-            
+
             # Calculate Exponential Backoff delay: base * (2 ** (retry_count - 1))
             delay = base_delay_seconds * (2 ** (job.retry_count - 1))
             execute_at_timestamp = time.time() + delay
@@ -237,7 +236,7 @@ class RedisQueueManager:
             job.status = JobStatus.FAILED
             job.error_message = f"Exhausted {job.max_retries} retries. Final error: {error_message}"
             job.traceback = traceback_str
-            job.completed_at = datetime.now(timezone.utc).isoformat()
+            job.completed_at = datetime.now(UTC).isoformat()
 
             job_key = self._get_job_key(job_id)
             await client.hset(job_key, mapping={
@@ -291,7 +290,7 @@ class RedisQueueManager:
 
         return requeued_count
 
-    async def retry_failed_job(self, job_id: str) -> Optional[JobPayload]:
+    async def retry_failed_job(self, job_id: str) -> JobPayload | None:
         """
         Manually re-enqueues a failed or DLQ job.
         """
@@ -326,12 +325,12 @@ class RedisQueueManager:
         logger.info("Manually re-enqueued failed job '%s' into '%s'", job_id, queue_key)
         return job
 
-    async def get_all_queue_stats(self) -> List[QueueStats]:
+    async def get_all_queue_stats(self) -> list[QueueStats]:
         """
         Collects real-time statistics across all queues.
         """
         client = await self.get_redis()
-        stats_list: List[QueueStats] = []
+        stats_list: list[QueueStats] = []
         dlq_count = await client.scard(self._get_dlq_key())
 
         for q_type in QueueType:
@@ -339,7 +338,7 @@ class RedisQueueManager:
             pending_count = await client.llen(queue_key)
 
             # Retrieve counts by status for this queue type if stored or total status sets
-            queued_set = await client.scard(f"jobs:status:{JobStatus.QUEUED.value}")
+            _queued_set = await client.scard(f"jobs:status:{JobStatus.QUEUED.value}")
             proc_set = await client.scard(f"jobs:status:{JobStatus.PROCESSING.value}")
             comp_set = await client.scard(f"jobs:status:{JobStatus.COMPLETED.value}")
             fail_set = await client.scard(f"jobs:status:{JobStatus.FAILED.value}")
@@ -360,8 +359,8 @@ class RedisQueueManager:
         return stats_list
 
     async def list_jobs_by_status(
-        self, status: Optional[JobStatus] = None, limit: int = 50
-    ) -> List[JobPayload]:
+        self, status: JobStatus | None = None, limit: int = 50
+    ) -> list[JobPayload]:
         """
         Lists stored jobs filtered by status.
         """
@@ -373,7 +372,7 @@ class RedisQueueManager:
             keys = await client.keys("job:*")
             job_ids = [k.replace("job:", "") for k in keys][:limit]
 
-        jobs: List[JobPayload] = []
+        jobs: list[JobPayload] = []
         for j_id in job_ids:
             j = await self.get_job(j_id)
             if j:
@@ -381,7 +380,7 @@ class RedisQueueManager:
 
         return sorted(jobs, key=lambda x: x.created_at, reverse=True)
 
-    async def purge_queue(self, queue_type: Optional[QueueType] = None, dlq: bool = False) -> int:
+    async def purge_queue(self, queue_type: QueueType | None = None, dlq: bool = False) -> int:
         """
         Purges jobs from a specific queue or Dead Letter Queue.
         """

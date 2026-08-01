@@ -1,6 +1,6 @@
 import uuid
-from typing import List
-from fastapi import APIRouter, Depends, status
+
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,7 +15,7 @@ from app.services.repository_analytics import RepositoryAnalyticsService
 router = APIRouter()
 
 
-@router.get("", response_model=List[RepositoryResponse])
+@router.get("", response_model=list[RepositoryResponse])
 async def list_repositories(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),

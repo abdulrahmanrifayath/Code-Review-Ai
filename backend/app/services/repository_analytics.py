@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Optional
+from datetime import UTC, datetime, timedelta
+
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,8 +24,8 @@ from app.schemas.analytics_dto import (
     IssueDistributionResponse,
     IssueSeverityBreakdown,
     QualityTrendsResponse,
-    RepositoryRankItem,
     RepositoryRankingsResponse,
+    RepositoryRankItem,
     ReviewHistoryItem,
     ReviewHistoryResponse,
     TrendDataPoint,
@@ -79,8 +79,8 @@ class RepositoryAnalyticsService:
         days_map = {"7d": 7, "30d": 30, "90d": 90, "1y": 365}
         num_days = days_map.get(timeframe, 30)
 
-        today = datetime.now(timezone.utc).date()
-        data_points: List[TrendDataPoint] = []
+        today = datetime.now(UTC).date()
+        data_points: list[TrendDataPoint] = []
 
         # Generate realistic trend time series data
         for i in range(num_days - 1, -1, -1):
@@ -123,7 +123,7 @@ class RepositoryAnalyticsService:
         res = await self.db.execute(stmt)
         repos = list(res.scalars().all())
 
-        items: List[RepositoryRankItem] = []
+        items: list[RepositoryRankItem] = []
 
         if not repos:
             # Fallback mock rankings for demonstration
@@ -158,7 +158,7 @@ class RepositoryAnalyticsService:
                 sec_count = 1 if repo.open_issues_count > 3 else 0
                 perf_count = repo.open_issues_count // 2
                 quality_score = max(60.0, 98.0 - (sec_count * 10 + perf_count * 3))
-                
+
                 grade = "A+"
                 if quality_score < 70:
                     grade = "C"
@@ -191,8 +191,8 @@ class RepositoryAnalyticsService:
 
     async def get_review_history(
         self,
-        search: Optional[str] = None,
-        status: Optional[str] = None,
+        search: str | None = None,
+        status: str | None = None,
         limit: int = 50,
     ) -> ReviewHistoryResponse:
         """
@@ -202,7 +202,7 @@ class RepositoryAnalyticsService:
         pr_res = await self.db.execute(pr_stmt)
         prs = list(pr_res.scalars().all())
 
-        items: List[ReviewHistoryItem] = []
+        items: list[ReviewHistoryItem] = []
 
         if not prs:
             # Sample demo review audit items
@@ -226,7 +226,7 @@ class RepositoryAnalyticsService:
                         review_status=rev_status,
                         quality_score=score,
                         findings_count=findings,
-                        created_at=datetime.now(timezone.utc) - timedelta(hours=number % 24),
+                        created_at=datetime.now(UTC) - timedelta(hours=number % 24),
                         html_url=f"https://github.com/{repo}/pull/{number}",
                     )
                 )
@@ -355,8 +355,8 @@ class RepositoryAnalyticsService:
             LanguageShare(language="Other", percentage=10.0, color="#64748b"),
         ]
 
-        today = datetime.now(timezone.utc).date()
-        commit_activity: List[CommitActivityPoint] = []
+        today = datetime.now(UTC).date()
+        commit_activity: list[CommitActivityPoint] = []
         for i in range(6, -1, -1):
             day_date = today - timedelta(days=i)
             day_str = day_date.strftime("%a")
@@ -370,9 +370,9 @@ class RepositoryAnalyticsService:
         ).where(
             PullRequest.repository_id == repo.id
         ).group_by(Commit.author_name)
-        
+
         contrib_res = await self.db.execute(contrib_stmt)
-        contributors: List[ContributorStats] = []
+        contributors: list[ContributorStats] = []
         for author_name, c_count in contrib_res.all():
             if author_name:
                 contributors.append(
@@ -395,11 +395,11 @@ class RepositoryAnalyticsService:
         pr_stmt = select(PullRequest).where(
             PullRequest.repository_id == repo.id
         ).order_by(PullRequest.updated_at.desc()).limit(10)
-        
+
         pr_res = await self.db.execute(pr_stmt)
         prs = pr_res.scalars().all()
 
-        review_history: List[ReviewTimelineItem] = []
+        review_history: list[ReviewTimelineItem] = []
         for pr in prs:
             review_history.append(
                 ReviewTimelineItem(

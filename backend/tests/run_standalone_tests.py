@@ -1,14 +1,15 @@
-import sys
 import os
+import sys
 
 # Add backend directory to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from app.services.performance_analyzer.engine import PerformanceAnalyzerEngine
 from app.services.code_quality_engine.calculator import CodeQualityCalculator
-from app.services.test_generator.generator import AITestGeneratorEngine
 from app.services.doc_generator.generator import AIDocGeneratorEngine
+from app.services.performance_analyzer.engine import PerformanceAnalyzerEngine
 from app.services.reports.report_generator import ProfessionalReportGeneratorEngine
+from app.services.test_generator.generator import AITestGeneratorEngine
+
 
 def run_tests():
     print("--- Running Performance Analyzer Tests ---")

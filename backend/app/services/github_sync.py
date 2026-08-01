@@ -1,6 +1,5 @@
 import uuid
-from datetime import datetime, timezone
-from typing import List, Tuple
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,13 +28,13 @@ class GitHubSyncService:
             raise ValidationError("Failed to decrypt GitHub access token.")
         return GitHubAPIService(plain_token)
 
-    async def sync_repositories_for_user(self, user: User) -> List[Repository]:
+    async def sync_repositories_for_user(self, user: User) -> list[Repository]:
         """
         Synchronize all accessible GitHub repositories into database.
         """
         api = self._get_api_service(user)
         repos_data = await api.get_user_repositories()
-        synced_repos: List[Repository] = []
+        synced_repos: list[Repository] = []
 
         for r_data in repos_data:
             github_repo_id = r_data["id"]
@@ -72,13 +71,13 @@ class GitHubSyncService:
                     is_active=True,
                 )
                 self.db.add(repo)
-            
+
             synced_repos.append(repo)
 
         await self.db.flush()
         return synced_repos
 
-    async def sync_pull_requests_for_repo(self, user: User, repo_id: uuid.UUID) -> Tuple[Repository, List[PullRequest]]:
+    async def sync_pull_requests_for_repo(self, user: User, repo_id: uuid.UUID) -> tuple[Repository, list[PullRequest]]:
         """
         Synchronize Pull Requests, Commits, and Changed Files for a specific Repository.
         """
@@ -90,7 +89,7 @@ class GitHubSyncService:
 
         api = self._get_api_service(user)
         prs_data = await api.get_repository_pull_requests(repo.owner_login, repo.name)
-        synced_prs: List[PullRequest] = []
+        synced_prs: list[PullRequest] = []
 
         for pr_item in prs_data:
             pr_number = pr_item["number"]

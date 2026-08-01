@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Optional
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,7 +29,7 @@ class TestGeneratorService:
         Generate test suite for given source code, persist snapshot to DB, and return response DTO.
         """
         # Validate PR if provided
-        pr_id: Optional[uuid.UUID] = request.pull_request_id
+        pr_id: uuid.UUID | None = request.pull_request_id
         if pr_id:
             pr_stmt = select(PullRequest).where(PullRequest.id == pr_id)
             pr_res = await self.db.execute(pr_stmt)
@@ -83,7 +83,7 @@ class TestGeneratorService:
             raise NotFoundError("GeneratedTest", test_id)
         return record
 
-    async def get_pr_generated_tests(self, pr_id: uuid.UUID) -> List[GeneratedTestItem]:
+    async def get_pr_generated_tests(self, pr_id: uuid.UUID) -> list[GeneratedTestItem]:
         """
         Fetch all generated test records associated with a Pull Request.
         """

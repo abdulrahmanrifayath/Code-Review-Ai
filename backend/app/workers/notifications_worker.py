@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from app.core.database import AsyncSessionLocal
 from app.core.queue.schemas import QueueType
@@ -16,10 +16,10 @@ class NotificationsWorker(BaseWorker):
     Supported by Redis exponential backoff retries on delivery errors.
     """
 
-    def __init__(self, worker_id: Optional[str] = None, queue_mgr: Optional[Any] = None):
+    def __init__(self, worker_id: str | None = None, queue_mgr: Any | None = None):
         super().__init__(queue_type=QueueType.NOTIFICATIONS, worker_id=worker_id, queue_mgr=queue_mgr)
 
-    async def process(self, action: str, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    async def process(self, action: str, payload: dict[str, Any]) -> dict[str, Any] | None:
         user_id_str = payload.get("user_id")
         repo_full_name = payload.get("repo_full_name")
         pr_number = payload.get("pr_number")
@@ -40,6 +40,7 @@ class NotificationsWorker(BaseWorker):
                 target_user_id = uuid.UUID(user_id_str) if isinstance(user_id_str, str) else user_id_str
             else:
                 from sqlalchemy import select
+
                 from app.models.user import User
                 user_res = await db.execute(select(User).limit(1))
                 first_user = user_res.scalars().first()

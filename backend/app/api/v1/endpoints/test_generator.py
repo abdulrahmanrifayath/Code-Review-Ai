@@ -1,5 +1,5 @@
 import uuid
-from typing import List
+
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,7 +35,7 @@ async def generate_test_suite(
     return await service.generate_and_save_test(request)
 
 
-@router.get("/repos/{owner}/{repo}/pulls/{number}", response_model=List[GeneratedTestItem])
+@router.get("/repos/{owner}/{repo}/pulls/{number}", response_model=list[GeneratedTestItem])
 async def get_pr_generated_tests(
     owner: str,
     repo: str,

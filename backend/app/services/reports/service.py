@@ -1,12 +1,11 @@
 import uuid
-from typing import List, Optional
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import NotFoundError
 from app.models.artifacts import ReviewReport
 from app.models.pull_request import PullRequest
-from app.models.repository import Repository
 from app.schemas.report_dto import (
     ReportGenerationRequest,
     ReportGeneratorResponse,
@@ -29,7 +28,7 @@ class ReportService:
         """
         Generate executive review report for given repository/PR, persist snapshot to DB, and return response DTO.
         """
-        pr_id: Optional[uuid.UUID] = request.pull_request_id
+        pr_id: uuid.UUID | None = request.pull_request_id
         if pr_id:
             pr_stmt = select(PullRequest).where(PullRequest.id == pr_id)
             pr_res = await self.db.execute(pr_stmt)
@@ -77,7 +76,7 @@ class ReportService:
             raise NotFoundError("ReviewReport", report_id)
         return record
 
-    async def get_pr_reports(self, pr_id: uuid.UUID) -> List[ReviewReportItem]:
+    async def get_pr_reports(self, pr_id: uuid.UUID) -> list[ReviewReportItem]:
         """
         Fetch all generated review report records associated with a Pull Request.
         """

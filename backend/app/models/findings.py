@@ -1,8 +1,10 @@
 import uuid
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
+
 from sqlalchemy import ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import Base
 
 if TYPE_CHECKING:
@@ -27,16 +29,16 @@ class SecurityFinding(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     severity: Mapped[str] = mapped_column(String(50), default="HIGH", nullable=False, index=True) # CRITICAL, HIGH, MEDIUM, LOW
-    cwe_id: Mapped[Optional[str]] = mapped_column(String(50), nullable=True) # e.g. CWE-89
-    
+    cwe_id: Mapped[str | None] = mapped_column(String(50), nullable=True) # e.g. CWE-89
+
     file_path: Mapped[str] = mapped_column(String(500), nullable=False)
     start_line: Mapped[int] = mapped_column(Integer, nullable=False)
     end_line: Mapped[int] = mapped_column(Integer, nullable=False)
-    start_column: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    end_column: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    
-    code_snippet: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    remediation_suggestion: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    start_column: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    end_column: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    code_snippet: Mapped[str | None] = mapped_column(Text, nullable=True)
+    remediation_suggestion: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
     analysis_result: Mapped["AnalysisResult"] = relationship("AnalysisResult", back_populates="security_findings")
@@ -55,21 +57,21 @@ class PerformanceFinding(Base):
     analysis_result_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("analysis_results.id", ondelete="CASCADE"), nullable=False
     )
-    rule_id: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
-    category: Mapped[Optional[str]] = mapped_column(String(100), nullable=True) # Nested loops, Repeated DB queries, etc.
+    rule_id: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    category: Mapped[str | None] = mapped_column(String(100), nullable=True) # Nested loops, Repeated DB queries, etc.
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     impact_level: Mapped[str] = mapped_column(String(50), default="MEDIUM", nullable=False) # HIGH, MEDIUM, LOW
-    complexity_delta: Mapped[Optional[str]] = mapped_column(String(50), nullable=True) # e.g., O(N) -> O(N^2)
-    suggestion_type: Mapped[Optional[str]] = mapped_column(String(100), nullable=True) # Caching, Pagination, Indexes, Async, Lazy loading
-    
+    complexity_delta: Mapped[str | None] = mapped_column(String(50), nullable=True) # e.g., O(N) -> O(N^2)
+    suggestion_type: Mapped[str | None] = mapped_column(String(100), nullable=True) # Caching, Pagination, Indexes, Async, Lazy loading
+
     file_path: Mapped[str] = mapped_column(String(500), nullable=False)
     start_line: Mapped[int] = mapped_column(Integer, nullable=False)
     end_line: Mapped[int] = mapped_column(Integer, nullable=False)
-    
-    code_snippet: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    optimization_suggestion: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    structured_recommendation: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    code_snippet: Mapped[str | None] = mapped_column(Text, nullable=True)
+    optimization_suggestion: Mapped[str | None] = mapped_column(Text, nullable=True)
+    structured_recommendation: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
     analysis_result: Mapped["AnalysisResult"] = relationship("AnalysisResult", back_populates="performance_findings")
@@ -91,12 +93,12 @@ class CodeSmell(Base):
     smell_type: Mapped[str] = mapped_column(String(100), nullable=False) # cyclomatic_complexity, duplicated_code, long_method
     description: Mapped[str] = mapped_column(Text, nullable=False)
     severity: Mapped[str] = mapped_column(String(50), default="WARNING", nullable=False) # INFO, WARNING, ERROR
-    
+
     file_path: Mapped[str] = mapped_column(String(500), nullable=False)
     start_line: Mapped[int] = mapped_column(Integer, nullable=False)
     end_line: Mapped[int] = mapped_column(Integer, nullable=False)
-    
-    refactoring_tip: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    refactoring_tip: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
     analysis_result: Mapped["AnalysisResult"] = relationship("AnalysisResult", back_populates="code_smells")

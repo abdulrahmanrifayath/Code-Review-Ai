@@ -1,5 +1,4 @@
-import json
-from typing import Any, Dict
+from typing import Any
 
 SYSTEM_PROMPT = """You are a Principal Software Architect and Lead Security Engineer performing an automated code review on a GitHub Pull Request.
 
@@ -46,7 +45,7 @@ JSON Output Schema:
 """
 
 
-def build_user_prompt(context: Dict[str, Any]) -> str:
+def build_user_prompt(context: dict[str, Any]) -> str:
     """
     Format user prompt incorporating PR metadata, diff patches, and static analysis findings.
     """

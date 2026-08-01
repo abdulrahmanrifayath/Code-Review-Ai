@@ -1,6 +1,6 @@
-from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -25,17 +25,17 @@ class JobPayload(BaseModel):
     job_id: str
     queue_type: QueueType
     action: str
-    payload: Dict[str, Any] = Field(default_factory=dict)
+    payload: dict[str, Any] = Field(default_factory=dict)
     status: JobStatus = JobStatus.QUEUED
     created_at: str
-    started_at: Optional[str] = None
-    completed_at: Optional[str] = None
-    worker_id: Optional[str] = None
+    started_at: str | None = None
+    completed_at: str | None = None
+    worker_id: str | None = None
     retry_count: int = 0
     max_retries: int = 3
-    error_message: Optional[str] = None
-    traceback: Optional[str] = None
-    result: Optional[Dict[str, Any]] = None
+    error_message: str | None = None
+    traceback: str | None = None
+    result: dict[str, Any] | None = None
 
 
 class QueueStats(BaseModel):

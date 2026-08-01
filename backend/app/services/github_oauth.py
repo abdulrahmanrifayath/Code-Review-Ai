@@ -1,6 +1,8 @@
 import secrets
-from typing import Any, Dict, Tuple
+from typing import Any
+
 import httpx
+
 from app.core.config import settings
 from app.core.errors import ValidationError
 
@@ -13,7 +15,7 @@ class GitHubOAuthService:
     TOKEN_URL = "https://github.com/login/oauth/access_token"
     USER_API_URL = "https://api.github.com/user"
 
-    def get_authorization_url(self) -> Tuple[str, str]:
+    def get_authorization_url(self) -> tuple[str, str]:
         """
         Generate GitHub OAuth authorization redirect URL and anti-CSRF state token.
         """
@@ -58,7 +60,7 @@ class GitHubOAuthService:
 
         return access_token
 
-    async def fetch_user_profile(self, github_access_token: str) -> Dict[str, Any]:
+    async def fetch_user_profile(self, github_access_token: str) -> dict[str, Any]:
         """
         Fetch authenticated user profile from GitHub REST API.
         """
@@ -77,7 +79,7 @@ class GitHubOAuthService:
             raise ValidationError("Failed to fetch user profile from GitHub.")
 
         profile = response.json()
-        
+
         # If email is private, fetch primary email
         if not profile.get("email"):
             async with httpx.AsyncClient() as client:

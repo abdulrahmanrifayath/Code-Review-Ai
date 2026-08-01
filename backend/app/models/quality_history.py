@@ -1,8 +1,10 @@
 import uuid
 from typing import TYPE_CHECKING, Optional
+
 from sqlalchemy import Float, ForeignKey, Index, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import Base
 
 if TYPE_CHECKING:
@@ -24,10 +26,10 @@ class QualityHistory(Base):
     repository_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("repositories.id", ondelete="CASCADE"), nullable=False
     )
-    pull_request_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    pull_request_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
     )
-    
+
     maintainability_score: Mapped[int] = mapped_column(Integer, nullable=False, default=85)
     technical_debt_hours: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     complexity_score: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)

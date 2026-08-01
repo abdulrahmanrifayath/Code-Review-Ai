@@ -1,6 +1,5 @@
-import uuid
-from datetime import datetime, timedelta, timezone
-from typing import Optional, Tuple
+from datetime import UTC, datetime, timedelta
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,7 +8,6 @@ from app.core.errors import UnauthorizedError, ValidationError
 from app.core.security import (
     create_access_token,
     create_refresh_token,
-    decrypt_token,
     encrypt_token,
     get_password_hash,
     hash_refresh_token,
@@ -41,7 +39,7 @@ class AuthService(BaseService[UserRepository]):
         user_data = user_in.model_dump(exclude={"password"})
         user_data["hashed_password"] = get_password_hash(user_in.password)
         user_data["role"] = "DEVELOPER"
-        
+
         return await self.repository.create(user_data)
 
     async def authenticate_user(self, email: str, password: str) -> User:
@@ -49,26 +47,26 @@ class AuthService(BaseService[UserRepository]):
         user = await self.repository.get_by_email(email)
         if not user or not user.hashed_password:
             raise UnauthorizedError("Invalid email or password.")
-        
+
         if not verify_password(password, user.hashed_password):
             raise UnauthorizedError("Invalid email or password.")
-            
+
         if not user.is_active:
             raise UnauthorizedError("User account is inactive.")
 
         return user
 
     async def create_session_and_tokens(
-        self, user: User, user_agent: Optional[str] = None, ip_address: Optional[str] = None
-    ) -> Tuple[str, str, int]:
+        self, user: User, user_agent: str | None = None, ip_address: str | None = None
+    ) -> tuple[str, str, int]:
         """
         Create a new persistent UserSession in DB and generate Access + Refresh token pair.
         Returns: (access_token, refresh_token, expires_in_seconds)
         """
         raw_refresh_token = create_refresh_token()
         token_hash = hash_refresh_token(raw_refresh_token)
-        
-        expires_at = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+
+        expires_at = datetime.now(UTC) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
 
         session = UserSession(
             user_id=user.id,
@@ -83,17 +81,17 @@ class AuthService(BaseService[UserRepository]):
 
         access_token = create_access_token(subject=str(user.id), role=user.role)
         expires_in = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
-        
+
         return access_token, raw_refresh_token, expires_in
 
     async def refresh_session_tokens(
-        self, refresh_token_str: str, user_agent: Optional[str] = None, ip_address: Optional[str] = None
-    ) -> Tuple[str, str, int, User]:
+        self, refresh_token_str: str, user_agent: str | None = None, ip_address: str | None = None
+    ) -> tuple[str, str, int, User]:
         """
         Validate refresh token, rotate refresh token, and issue new Access + Refresh token pair.
         """
         token_hash = hash_refresh_token(refresh_token_str)
-        
+
         statement = select(UserSession).where(UserSession.refresh_token_hash == token_hash)
         result = await self.db.execute(statement)
         session = result.scalars().first()
@@ -132,8 +130,8 @@ class AuthService(BaseService[UserRepository]):
         return False
 
     async def authenticate_github_user(
-        self, code: str, user_agent: Optional[str] = None, ip_address: Optional[str] = None
-    ) -> Tuple[User, str, str, int]:
+        self, code: str, user_agent: str | None = None, ip_address: str | None = None
+    ) -> tuple[User, str, str, int]:
         """
         Complete GitHub OAuth authentication flow: exchange code, fetch profile, upsert user,
         encrypt GitHub token, and issue platform access & refresh tokens.

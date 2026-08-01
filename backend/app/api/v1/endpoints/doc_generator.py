@@ -1,5 +1,5 @@
 import uuid
-from typing import List
+
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,7 +35,7 @@ async def generate_documentation(
     return await service.generate_and_save_doc(request)
 
 
-@router.get("/repos/{owner}/{repo}/pulls/{number}", response_model=List[GeneratedDocItem])
+@router.get("/repos/{owner}/{repo}/pulls/{number}", response_model=list[GeneratedDocItem])
 async def get_pr_generated_docs(
     owner: str,
     repo: str,

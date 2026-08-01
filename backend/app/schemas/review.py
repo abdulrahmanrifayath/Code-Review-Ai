@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -16,9 +17,9 @@ class CodeReviewCreate(CodeReviewBase):
 class CodeReviewResponse(CodeReviewBase):
     id: int
     status: str
-    summary: Optional[str] = None
-    findings: Optional[Dict[str, Any]] = None
-    metrics: Optional[Dict[str, Any]] = None
+    summary: str | None = None
+    findings: dict[str, Any] | None = None
+    metrics: dict[str, Any] | None = None
     created_at: datetime
     updated_at: datetime
 

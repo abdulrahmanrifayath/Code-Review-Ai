@@ -1,4 +1,3 @@
-import pytest
 from app.services.performance_analyzer.engine import PerformanceAnalyzerEngine
 
 

@@ -54,7 +54,7 @@ async def main():
 
     # Setup signal handler for graceful shutdown
     loop = asyncio.get_running_loop()
-    
+
     def shutdown():
         logger.info("Shutdown signal received. Stopping workers...")
         for w in workers:

@@ -1,7 +1,8 @@
 import uuid
-from typing import AsyncGenerator, Callable, List, Optional
+from collections.abc import Callable
+
 import jwt
-from fastapi import Depends, Request, Response, status
+from fastapi import Depends, Request, Response
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,7 +33,7 @@ def get_auth_service(
 async def get_current_user(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    header_token: Optional[str] = Depends(reusable_oauth2),
+    header_token: str | None = Depends(reusable_oauth2),
 ) -> User:
     """
     Dependency to resolve authenticated user from Bearer header OR HttpOnly cookie.
@@ -70,7 +71,7 @@ def require_role(*allowed_roles: str) -> Callable:
     async def role_checker(current_user: User = Depends(get_current_user)) -> User:
         if current_user.is_superuser or current_user.role == "ADMIN":
             return current_user
-        
+
         if current_user.role not in allowed_roles:
             raise ForbiddenError(
                 f"Role '{current_user.role}' is not authorized to access this resource. Required: {list(allowed_roles)}"
