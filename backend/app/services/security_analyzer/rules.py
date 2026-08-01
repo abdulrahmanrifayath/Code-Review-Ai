@@ -65,7 +65,7 @@ SECURITY_RULES: list[dict[str, Any]] = [
         "severity": "MEDIUM",
         "title": "Insecure Temporary File Creation",
         "description": "Creation of temporary file with insecure permissions or predictable filename.",
-        "pattern": re.compile(r"(?:tempnam\(|mktemp\(|open\(['\"]/tmp/", re.IGNORECASE),
+        "pattern": re.compile(r"(?:tempnam\(|mktemp\(|open\(['\"]/tmp/)", re.IGNORECASE),
         "remediation": "Use secure tempfile functions (e.g. tempfile.NamedTemporaryFile) with restricted permissions.",
     },
     # 7. XSS (Cross-Site Scripting)
