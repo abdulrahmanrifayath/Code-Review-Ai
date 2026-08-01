@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import JSON, ForeignKey, Index, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import JSON, ForeignKey, Index, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -19,15 +18,14 @@ class ActivityLog(Base):
     __tablename__ = "activity_logs"
     __table_args__ = (
         Index("ix_activity_logs_user_id", "user_id"),
-        Index("ix_activity_logs_action", "action"),
     )
 
     user_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        Uuid(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     action: Mapped[str] = mapped_column(String(100), nullable=False, index=True) # repo_connected, review_requested
     entity_type: Mapped[str] = mapped_column(String(100), nullable=False) # repository, pull_request, user
-    entity_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    entity_id: Mapped[uuid.UUID | None] = mapped_column(Uuid(as_uuid=True), nullable=True)
 
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
@@ -44,11 +42,10 @@ class ReviewHistory(Base):
     __tablename__ = "review_histories"
     __table_args__ = (
         Index("ix_review_histories_pr_id", "pull_request_id"),
-        Index("ix_review_histories_event", "event_type"),
     )
 
     pull_request_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=False
     )
     event_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True) # status_change, re_review, comment_posted
     previous_state: Mapped[str | None] = mapped_column(String(100), nullable=True)

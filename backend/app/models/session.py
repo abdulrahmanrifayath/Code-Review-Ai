@@ -2,8 +2,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -17,13 +16,9 @@ class UserSession(Base):
     User Active Authentication Session & Refresh Token tracking model.
     """
     __tablename__ = "user_sessions"
-    __table_args__ = (
-        Index("ix_user_sessions_user_id", "user_id"),
-        Index("ix_user_sessions_token_hash", "refresh_token_hash", unique=True),
-    )
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
     )
     refresh_token_hash: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)

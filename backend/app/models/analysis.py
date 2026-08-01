@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import JSON, ForeignKey, Index, Integer, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import JSON, ForeignKey, Index, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -19,11 +18,10 @@ class AnalysisResult(Base):
     __tablename__ = "analysis_results"
     __table_args__ = (
         Index("ix_analysis_results_job_id", "review_job_id"),
-        Index("ix_analysis_results_tool", "tool_name"),
     )
 
     review_job_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("review_jobs.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("review_jobs.id", ondelete="CASCADE"), nullable=False
     )
     tool_name: Mapped[str] = mapped_column(String(100), nullable=False, index=True) # tree-sitter, eslint, pylint, checkstyle
     category: Mapped[str] = mapped_column(String(50), nullable=False) # ast_parse, linter, static_analysis

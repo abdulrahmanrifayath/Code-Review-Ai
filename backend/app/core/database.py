@@ -8,13 +8,14 @@ from sqlalchemy.ext.asyncio import (
 
 from app.core.config import settings
 
+is_sqlite = "sqlite" in settings.DATABASE_URL
+engine_kwargs: dict = {"echo": False, "future": True}
+if not is_sqlite:
+    engine_kwargs.update({"pool_pre_ping": True, "pool_size": 10, "max_overflow": 20})
+
 engine = create_async_engine(
     settings.DATABASE_URL,
-    echo=False,
-    future=True,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
+    **engine_kwargs
 )
 
 AsyncSessionLocal = async_sessionmaker(

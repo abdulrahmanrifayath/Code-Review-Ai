@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import JSON, BigInteger, Boolean, ForeignKey, Index, Integer, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import JSON, BigInteger, Boolean, ForeignKey, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -18,17 +17,12 @@ class Repository(Base):
     Connected code repository registered for automated AI code reviews.
     """
     __tablename__ = "repositories"
-    __table_args__ = (
-        Index("ix_repositories_full_name", "full_name", unique=True),
-        Index("ix_repositories_github_repo_id", "github_repo_id", unique=True),
-        Index("ix_repositories_org_id", "organization_id"),
-    )
 
     organization_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=True
+        Uuid(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), index=True, nullable=True
     )
     github_installation_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("github_installations.id", ondelete="SET NULL"), nullable=True
+        Uuid(as_uuid=True), ForeignKey("github_installations.id", ondelete="SET NULL"), nullable=True
     )
 
     github_repo_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False, index=True)

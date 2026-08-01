@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Index, String, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import ForeignKey, String, UniqueConstraint, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -18,10 +17,6 @@ class Organization(Base):
     SaaS Tenant Account grouping team members and connected code repositories.
     """
     __tablename__ = "organizations"
-    __table_args__ = (
-        Index("ix_organizations_slug", "slug", unique=True),
-        Index("ix_organizations_deleted_at", "deleted_at"),
-    )
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
@@ -48,15 +43,13 @@ class OrganizationMember(Base):
     __tablename__ = "organization_members"
     __table_args__ = (
         UniqueConstraint("organization_id", "user_id", name="uq_org_user_member"),
-        Index("ix_org_members_user", "user_id"),
-        Index("ix_org_members_org", "organization_id"),
     )
 
     organization_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), index=True, nullable=False
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
     )
     role: Mapped[str] = mapped_column(String(50), default="MEMBER", nullable=False) # OWNER, ADMIN, MEMBER
     status: Mapped[str] = mapped_column(String(50), default="ACTIVE", nullable=False) # ACTIVE, INVITED

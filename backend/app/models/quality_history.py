@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Float, ForeignKey, Index, Integer, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Float, ForeignKey, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -17,17 +16,12 @@ class QualityHistory(Base):
     Stores historical snapshots of code quality metrics for repositories and pull requests over time.
     """
     __tablename__ = "quality_history"
-    __table_args__ = (
-        Index("ix_quality_history_repo_id", "repository_id"),
-        Index("ix_quality_history_pr_id", "pull_request_id"),
-        Index("ix_quality_history_created_at", "created_at"),
-    )
 
     repository_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("repositories.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("repositories.id", ondelete="CASCADE"), index=True, nullable=False
     )
     pull_request_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
+        Uuid(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), index=True, nullable=True
     )
 
     maintainability_score: Mapped[int] = mapped_column(Integer, nullable=False, default=85)

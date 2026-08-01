@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import JSON, Boolean, ForeignKey, Index, Integer, String, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import JSON, Boolean, ForeignKey, Index, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -23,10 +22,10 @@ class AIReview(Base):
     )
 
     pull_request_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=False
     )
     review_job_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("review_jobs.id", ondelete="SET NULL"), nullable=True
+        Uuid(as_uuid=True), ForeignKey("review_jobs.id", ondelete="SET NULL"), nullable=True
     )
 
     summary: Mapped[str] = mapped_column(Text, nullable=False)

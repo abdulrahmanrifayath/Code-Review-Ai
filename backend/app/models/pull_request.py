@@ -11,8 +11,8 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    Uuid,
 )
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -37,7 +37,7 @@ class PullRequest(Base):
     )
 
     repository_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("repositories.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("repositories.id", ondelete="CASCADE"), nullable=False
     )
     pr_number: Mapped[int] = mapped_column(Integer, nullable=False)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
@@ -76,7 +76,7 @@ class Commit(Base):
     )
 
     pull_request_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=False
     )
     commit_sha: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
     author_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -103,7 +103,7 @@ class ChangedFile(Base):
     )
 
     pull_request_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=False
     )
     filename: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
     status: Mapped[str] = mapped_column(String(50), default="modified", nullable=False) # added, modified, removed, renamed

@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import JSON, Boolean, ForeignKey, Index, String, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import JSON, Boolean, ForeignKey, Index, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -22,7 +21,7 @@ class GeneratedTest(Base):
     )
 
     pull_request_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
+        Uuid(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
     )
     test_framework: Mapped[str] = mapped_column(String(50), default="pytest", nullable=False) # pytest, jest, junit
     test_category: Mapped[str] = mapped_column(String(50), default="comprehensive", nullable=False) # positive, negative, boundary, mock, comprehensive
@@ -47,7 +46,7 @@ class GeneratedDocumentation(Base):
     )
 
     pull_request_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
+        Uuid(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
     )
     doc_type: Mapped[str] = mapped_column(String(50), default="docstring", nullable=False) # docstring, javadoc, readme, api_doc, missing_comments, function_description, usage_examples
     doc_title: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -69,7 +68,7 @@ class ReviewReport(Base):
     )
 
     pull_request_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
+        Uuid(as_uuid=True), ForeignKey("pull_requests.id", ondelete="CASCADE"), nullable=True
     )
     report_type: Mapped[str] = mapped_column(String(50), default="MARKDOWN", nullable=False) # MARKDOWN, PDF, HTML, JSON
     report_title: Mapped[str | None] = mapped_column(String(255), nullable=True)

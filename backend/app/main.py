@@ -9,6 +9,10 @@ from app.core.errors import register_exception_handlers
 from app.core.logging import logger, setup_logging
 
 
+from app.core.database import engine
+from app.models import Base
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -16,6 +20,8 @@ async def lifespan(app: FastAPI):
     """
     setup_logging()
     logger.info("Starting up %s API...", settings.PROJECT_NAME)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     yield
     logger.info("Shutting down %s API...", settings.PROJECT_NAME)
 

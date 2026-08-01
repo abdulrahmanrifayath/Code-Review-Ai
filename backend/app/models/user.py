@@ -21,11 +21,7 @@ class User(Base):
     Platform User model for authentication, profile info, and workspace authorization.
     """
     __tablename__ = "users"
-    __table_args__ = (
-        Index("ix_users_email", "email", unique=True),
-        Index("ix_users_username", "username", unique=True),
-        Index("ix_users_github_user_id", "github_user_id", unique=True),
-    )
+    # Indexes are automatically generated via index=True on mapped columns
 
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     username: Mapped[str] = mapped_column(String(100), unique=True, index=True, nullable=False)

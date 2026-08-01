@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import JSON, BigInteger, ForeignKey, Index, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import JSON, BigInteger, ForeignKey, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -18,11 +17,6 @@ class GitHubInstallation(Base):
     GitHub App installation metadata, authorization tokens, and webhook secrets.
     """
     __tablename__ = "github_installations"
-    __table_args__ = (
-        Index("ix_github_installations_inst_id", "installation_id", unique=True),
-        Index("ix_github_installations_org", "organization_id"),
-        Index("ix_github_installations_user", "user_id"),
-    )
 
     installation_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False, index=True)
     account_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
@@ -30,10 +24,10 @@ class GitHubInstallation(Base):
     account_type: Mapped[str] = mapped_column(String(50), nullable=False) # User, Organization
 
     organization_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="SET NULL"), nullable=True
+        Uuid(as_uuid=True), ForeignKey("organizations.id", ondelete="SET NULL"), index=True, nullable=True
     )
     user_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        Uuid(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True, nullable=True
     )
 
     permissions: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)

@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, ForeignKey, Index, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Boolean, ForeignKey, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -16,12 +15,9 @@ class NotificationPreference(Base):
     User notification preferences for multi-channel dispatches (GitHub, Email, Slack, Discord, In-App).
     """
     __tablename__ = "notification_preferences"
-    __table_args__ = (
-        Index("ix_notification_preferences_user_id", "user_id", unique=True),
-    )
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True
+        Uuid(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True, index=True
     )
 
     email_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)

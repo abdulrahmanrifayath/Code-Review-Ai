@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Index, Integer, String, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import ForeignKey, Index, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -18,12 +17,11 @@ class SecurityFinding(Base):
     __tablename__ = "security_findings"
     __table_args__ = (
         Index("ix_sec_findings_analysis_id", "analysis_result_id"),
-        Index("ix_sec_findings_severity", "severity"),
         Index("ix_sec_findings_cwe", "cwe_id"),
     )
 
     analysis_result_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("analysis_results.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("analysis_results.id", ondelete="CASCADE"), nullable=False
     )
     rule_id: Mapped[str] = mapped_column(String(150), nullable=False)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -55,7 +53,7 @@ class PerformanceFinding(Base):
     )
 
     analysis_result_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("analysis_results.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("analysis_results.id", ondelete="CASCADE"), nullable=False
     )
     rule_id: Mapped[str | None] = mapped_column(String(150), nullable=True)
     category: Mapped[str | None] = mapped_column(String(100), nullable=True) # Nested loops, Repeated DB queries, etc.
@@ -88,7 +86,7 @@ class CodeSmell(Base):
     )
 
     analysis_result_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("analysis_results.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("analysis_results.id", ondelete="CASCADE"), nullable=False
     )
     smell_type: Mapped[str] = mapped_column(String(100), nullable=False) # cyclomatic_complexity, duplicated_code, long_method
     description: Mapped[str] = mapped_column(Text, nullable=False)
