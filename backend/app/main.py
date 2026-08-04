@@ -5,11 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
 from app.core.config import settings
+from app.core.database import engine
 from app.core.errors import register_exception_handlers
 from app.core.logging import logger, setup_logging
-
-
-from app.core.database import engine
 from app.models import Base
 
 
