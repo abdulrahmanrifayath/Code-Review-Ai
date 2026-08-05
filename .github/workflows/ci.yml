@@ -35,6 +35,11 @@ jobs:
         run: |
           pylint backend/app --disable=C0114,C0115,C0116 || true
 
+      - name: Run Backend Engine Unit Tests
+        run: |
+          python backend/tests/run_standalone_tests.py
+          pytest backend/tests/
+
   frontend-checks:
     name: Frontend Lint & Type Check
     runs-on: ubuntu-latest
@@ -61,3 +66,7 @@ jobs:
       - name: Run ESLint
         working-directory: ./frontend
         run: npm run lint
+
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: npm run build
