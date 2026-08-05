@@ -2,7 +2,7 @@ import asyncio
 import os
 import sys
 import unittest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 # Add backend directory to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -198,41 +198,50 @@ class TestAsyncQueueSystem(unittest.IsolatedAsyncioTestCase):
 
     async def test_workers_instantiation_and_process(self):
         """Test process execution for all 5 background worker implementations."""
+        mock_db = AsyncMock()
+        mock_db.add = MagicMock()
+        mock_db.commit = AsyncMock()
+        mock_session_ctx = MagicMock()
+        mock_session_ctx.__aenter__.return_value = mock_db
+        mock_session_ctx.__aexit__.return_value = None
+
         # 1. Report Generation Worker
         r_worker = ReportGenerationWorker(worker_id="test_report_w")
         r_res = await r_worker.process("generate_pdf", {"repo_full_name": "acme/repo", "format": "PDF"})
         self.assertEqual(r_res["format"], "PDF")
         self.assertIn("title", r_res)
 
-        # 2. Notifications Worker
-        n_worker = NotificationsWorker(worker_id="test_notif_w")
-        n_res = await n_worker.process("send_comment", {"repo_full_name": "acme/repo", "pr_number": 5})
-        self.assertEqual(n_res["status"], "delivered")
+        with patch("app.core.database.AsyncSessionLocal", return_value=mock_session_ctx):
+            # 2. Notifications Worker (mocked DB service)
+            n_worker = NotificationsWorker(worker_id="test_notif_w")
+            with patch("app.services.notification_service.NotificationService") as mock_ns_class:
+                mock_ns_instance = mock_ns_class.return_value
+                mock_ns_instance.dispatch_notification = AsyncMock(return_value=(MagicMock(), {"in_app": "delivered"}))
+                n_res = await n_worker.process("send_comment", {"repo_full_name": "acme/repo", "pr_number": 5, "user_id": "00000000-0000-0000-0000-000000000001"})
+                self.assertEqual(n_res["status"], "completed")
 
-        # 3. Static Analysis Worker (mocked DB service)
-        s_worker = StaticAnalysisWorker(worker_id="test_static_w")
-        with patch("app.services.analysis_service.AnalysisService.run_static_analysis", new_callable=AsyncMock) as mock_sa:
-            mock_sa.return_value = {"quality_score": 95}
-            with patch("app.core.database.AsyncSessionLocal"):
+            # 3. Static Analysis Worker (mocked DB service)
+            s_worker = StaticAnalysisWorker(worker_id="test_static_w")
+            with patch("app.services.analysis_service.AnalysisService") as mock_sa_class:
+                mock_sa_instance = mock_sa_class.return_value
+                mock_sa_instance.run_static_analysis = AsyncMock(return_value={"quality_score": 95})
                 sa_res = await s_worker.process("analyze", {"repo_full_name": "acme/repo", "pr_number": 10})
                 self.assertEqual(sa_res["quality_score"], 95)
 
-        # 4. AI Analysis Worker (mocked DB service)
-        ai_worker = AIAnalysisWorker(worker_id="test_ai_w", queue_mgr=self.queue_mgr)
-        from app.services.ai_review_service import AIReviewService
-
-        with patch.object(AIReviewService, "generate_ai_review", new_callable=AsyncMock) as mock_ai:
-            mock_ai.return_value = {"id": "123", "summary": "Great PR!"}
-            with patch("app.core.database.AsyncSessionLocal"):
+            # 4. AI Analysis Worker (mocked DB service)
+            ai_worker = AIAnalysisWorker(worker_id="test_ai_w", queue_mgr=self.queue_mgr)
+            with patch("app.services.ai_review_service.AIReviewService") as mock_ai_class:
+                mock_ai_instance = mock_ai_class.return_value
+                mock_ai_instance.generate_ai_review = AsyncMock(return_value={"id": "123", "summary": "Great PR!"})
                 with patch("app.workers.ai_analysis_worker.queue_manager", self.queue_mgr):
                     ai_res = await ai_worker.process("generate", {"repo_full_name": "acme/repo", "pr_number": 12})
                     self.assertEqual(ai_res["summary"], "Great PR!")
 
-        # 5. Webhook Worker (mocked DB service)
-        wh_worker = WebhookWorker(worker_id="test_wh_w", queue_mgr=self.queue_mgr)
-        with patch("app.services.github_webhook.GitHubWebhookService.process_incoming_webhook", new_callable=AsyncMock) as mock_wh:
-            mock_wh.return_value = ("PROCESSED", "Success", "opened")
-            with patch("app.core.database.AsyncSessionLocal"):
+            # 5. Webhook Worker (mocked DB service)
+            wh_worker = WebhookWorker(worker_id="test_wh_w", queue_mgr=self.queue_mgr)
+            with patch("app.services.github_webhook.GitHubWebhookService") as mock_wh_class:
+                mock_wh_instance = mock_wh_class.return_value
+                mock_wh_instance.process_incoming_webhook = AsyncMock(return_value=("PROCESSED", "Success", "opened"))
                 with patch("app.workers.webhook_worker.queue_manager", self.queue_mgr):
                     wh_res = await wh_worker.process("handle", {"delivery_id": "del_123", "event_type": "pull_request"})
                     self.assertEqual(wh_res["status"], "PROCESSED")

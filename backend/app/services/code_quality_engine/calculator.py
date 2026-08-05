@@ -51,9 +51,13 @@ class CodeQualityCalculator:
 
         total_functions = max(1, len(functions))
 
+        # Strip comments and docstrings when evaluating decision keywords
+        code_without_comments = re.sub(r'"""[\s\S]*?"""|\'\'\'[\s\S]*?\'\'\'|/\*[\s\S]*?\*/|#.*|//.*', '', code_content)
+        code_lines = [l for l in code_without_comments.splitlines() if l.strip()]
+
         # Decision keywords for complexity
         decision_keywords = ["if ", "elif ", "else if", "for ", "while ", "except ", "catch ", "case ", "&&", "||", " ? "]
-        total_decisions = sum(1 for line in lines for kw in decision_keywords if kw in line)
+        total_decisions = sum(1 for line in code_lines for kw in decision_keywords if kw in line)
 
         avg_complexity = round(1.0 + (total_decisions / float(total_functions)), 2)
 

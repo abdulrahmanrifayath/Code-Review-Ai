@@ -17,6 +17,7 @@ from app.services.notification_service import NotificationService
 class TestNotificationSystem(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.db = AsyncMock()
+        self.db.add = MagicMock()
         mock_result = MagicMock()
         mock_result.scalar.return_value = 0
         mock_result.scalars.return_value.first.return_value = None
