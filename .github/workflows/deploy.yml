@@ -99,12 +99,13 @@ jobs:
     name: Deploy to Production Server via SSH
     needs: build-and-push-docker
     runs-on: ubuntu-latest
-    if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && secrets.PROD_SERVER_IP != ''
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Execute Remote SSH Deployment
+        if: ${{ secrets.PROD_SERVER_IP != '' }}
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.PROD_SERVER_IP }}
