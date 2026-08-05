@@ -29,6 +29,7 @@ jobs:
       - name: Run Backend Engine Unit Tests
         run: |
           python backend/tests/run_standalone_tests.py
+          pytest backend/tests/
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -56,6 +57,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Lowercase Repository Name for Docker GHCR Tags
+        run: |
+          echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -72,7 +77,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile.prod
           push: true
-          tags: ghcr.io/${{ github.repository }}/backend:latest,ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+          tags: ghcr.io/${{ env.REPO_LOWER }}/backend:latest,ghcr.io/${{ env.REPO_LOWER }}/backend:${{ github.sha }}
 
       - name: Build & Push Worker Image
         uses: docker/build-push-action@v5
@@ -80,7 +85,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile.worker
           push: true
-          tags: ghcr.io/${{ github.repository }}/worker:latest,ghcr.io/${{ github.repository }}/worker:${{ github.sha }}
+          tags: ghcr.io/${{ env.REPO_LOWER }}/worker:latest,ghcr.io/${{ env.REPO_LOWER }}/worker:${{ github.sha }}
 
       - name: Build & Push Frontend Image
         uses: docker/build-push-action@v5
@@ -88,7 +93,7 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile.prod
           push: true
-          tags: ghcr.io/${{ github.repository }}/frontend:latest,ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}
+          tags: ghcr.io/${{ env.REPO_LOWER }}/frontend:latest,ghcr.io/${{ env.REPO_LOWER }}/frontend:${{ github.sha }}
 
   deploy-to-production:
     name: Deploy to Production Server via SSH
